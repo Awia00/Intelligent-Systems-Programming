@@ -142,3 +142,17 @@ To go over the algorithm
    132 -> 1322[label="CUT"];
  }
 '/>
+
+
+## Exercise 3
+### a)
+Since a MiniMax assumes that min always plays optimally, MiniMax will always choose the actions which gives the highest value even if min returns the worst value.
+Therefore if a Min is suboptimal, it will return higher values and we have lost nothing since the end result will then always be higher.
+The minimax value for a node takes all its leafs into consideration and a suboptimal answer will then return a sub tree with a higher value.
+
+
+MiniMax garantees a minimum value of a subtree and if Min chooses a non minimal subtree in its descision the any subtrees below that cannot have a worse value.
+
+### b)
+If we assume that min always returns the worst possible action the Max can pursue the max value of any leafs.
+If min is randomly choosing leafs, Max shold pursue trees with the highest average value.
