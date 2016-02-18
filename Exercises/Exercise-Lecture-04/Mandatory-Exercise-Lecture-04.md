@@ -20,7 +20,7 @@ with 50% chance of landing on each side. The rules are as follows:
 ## Task 1
 Function: MiniMax-Descision is the same
 
-    function MiniMax-Descision(state) return action¨
+    function MiniMax-Descision(state) return action
         Chance-Max(state)
 
     function Max-Value(state) return a utility value
@@ -44,4 +44,11 @@ Function: MiniMax-Descision is the same
     function Chance-Max(state) 
         return (Max-Value(Result(state, head)), Max-Value(Result(state, tails)))*0.5
 
+Note that this solution only works for the game given in the assignment. We start with a throw
+
 ## Task 2
+a)
+See the attached image "Simple-TTT-GameTree.png" to see the GameTree
+
+b)
+On the game tree "Simple-TTT-GameTree.png" the evaluation of a ExpectMiniMax is run and the result is 0.75 for both situations where a Head and a Tails is thrown first.W
