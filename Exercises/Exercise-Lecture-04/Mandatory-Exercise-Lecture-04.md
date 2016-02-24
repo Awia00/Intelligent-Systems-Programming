@@ -1,24 +1,5 @@
 # Mandatory Exercise Lecture 04 - Tic-Tac-Toe
-Assume that MAX and MIN play with circle and cross tokens, respectively. The game is played using a coin
-with 50% chance of landing on each side. The rules are as follows:
-1. Initially the board is empty.
-
-2. A player starts his turn by flipping the coin.
-
-3. If the coin shows heads, the player can place a token on positions marked H, otherwise the player must place a token on the position marked T.
-
-4. The game terminates when:
-
-    a) a player is unable to place a token, because there are no empty positions left with the right mark, or
-    
-    b) a player wins the game.
-    
-5. A player wins the game, if the player has two tokens on any of the 5 pair of positions connected by a dashed line.
-
-6. The utility of the game is 1if MAX wins, ‐1 if Min wins, and 0 otherwise.  
-
 ## Task 1
-Function: MiniMax-Descision is the same
 
     function MiniMax-Descision(state) return action
         Chance-Max(state)
@@ -51,4 +32,5 @@ a)
 See the attached image "Simple-TTT-GameTree.png" to see the GameTree
 
 b)
-On the game tree "Simple-TTT-GameTree.png" the evaluation of a ExpectMiniMax is run and the result is 0.75 for both situations where a Head and a Tails is thrown first.W
+On the game tree "Simple-TTT-GameTree.png" the evaluation of a ExpectMiniMax is run and the highest utility, 0.5, is acheived by placing the x in the first coloumn second row. 
+So that is the decision for MAX's first move if the coin flipped to HEAD.
