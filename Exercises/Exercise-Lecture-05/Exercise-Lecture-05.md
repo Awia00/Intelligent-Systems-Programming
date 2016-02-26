@@ -75,3 +75,65 @@ First i simplify the conjunction
     !ss || (!ss && !r) || (!ss && w)
     
     
+
+## Exercise 2
+
+### a)
+    
+    Smoke ⇒ Smoke
+    <=>
+    ¬smoke ∨ smoke
+    
+So that means that it is valid.
+
+### b)
+
+|            	| Smoke False 	| Smoke True 	|
+|------------	|-------------	|------------	|
+| Fire False 	| T           	| T          	|
+| Fire True  	| F           	| T          	|
+
+So it is satisfiable since there is both true and false depending on the model.
+
+
+### c)
+
+first simplify
+    
+    (Smoke ⇒ Fire) ⇒ (¬Smoke ⇒ ¬Fire)
+    <=> by implication elimination
+    ¬(Smoke ⇒ Fire) ∨ (¬Smoke ⇒ ¬Fire)
+    <=> by implication elimination
+    ¬(¬Smoke ∨ Fire) ∨ (¬Smoke ⇒ ¬Fire)
+    <=> by de Morgan
+    (¬(¬Smoke) ∧ ¬Fire) ∨ (¬Smoke ⇒ ¬Fire)
+    <=> by double negation elimination
+    (Smoke ∧ ¬Fire) ∨ (¬Smoke ⇒ ¬Fire)
+    <=> by implication elimination
+    (Smoke ∧ ¬Fire) ∨ (¬(¬Smoke) ∨ ¬Fire)
+    <=> by double negation elimination
+    (Smoke ∧ ¬Fire) ∨ (Smoke ∨ ¬Fire)
+
+Then i do a truth table
+
+| Smoke 	| Fire 	| Smoke ∧ ¬Fire 	| Smoke ∨ ¬Fire 	| (Smoke ∧ ¬Fire) ∨ (Smoke ∨ ¬Fire) 	|
+|-------	|------	|---------------	|---------------	|-----------------------------------	|
+| T     	| F    	| T             	| T             	| T                                 	|
+| T     	| T    	| F             	| T             	| T                                 	|
+| F     	| F    	| F             	| T             	| T                                 	|
+| F     	| T    	| F             	| F             	| F                                 	|
+
+So it is satisfiable since there is both true and false depending on the model.
+
+### d)
+
+    Smoke ∨ Fire ∨ ¬Fire
+    <=>
+    Smoke ∨ true
+    <=>
+    true
+    
+So this is valid.
+
+
+### e)
