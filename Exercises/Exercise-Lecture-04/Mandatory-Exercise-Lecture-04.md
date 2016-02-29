@@ -39,7 +39,8 @@ Note that this solution only works for the game given in the assignment. The cha
 ## Task 2
 a)
 See the attached image "Simple-TTT-GameTree.png" to see the GameTree. For completeness the subtree where tails was the first value of the flipped coin, is included but should be disregarded for this task. Furthermore I have not written probability on the chance nodes, since they are all 0.5
+In this tree MAX is X and MIN is O, (I misread the exercise description).
 
 b)
-On the game tree "Simple-TTT-GameTree.png" the evaluation of a ExpectMiniMax is run and the highest utility, 0.5, is achieved by placing the x in the first column, second row.
+On the game tree "Simple-TTT-GameTree.png" the evaluation of a ExpectMiniMax is run and the highest utility, 0.75, is achieved by placing the x in the first column, second row.
 So that is the decision for MAX's first move if the coin flipped to HEAD.
