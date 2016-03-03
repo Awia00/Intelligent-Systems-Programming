@@ -8,12 +8,11 @@ Therefore situations where we have a lot of facts that do not have any impact on
 ## Task 2
 I assume that the KB is in CNF
 
-    function PL-BC-Entails? (KB, q, Value-Map) returns true or false
+    function PL-BC-Entails? (KB, q) returns true or false
         inputs: KB, the knowledge base, a set of propositional definite clauses
                 q, the query, a propositional symbol
-                Value-Map, a map of propositional symbol keys mapping to boolean values, empty to begin with
         
-        Value-Map ← Check-Clause(KB, q, Value-Map)
+        Value-Map ← Check-Clause(KB, q, Map.Empty)
         if q is in Value-Map
             return Value-Map[q]
             
@@ -42,7 +41,7 @@ I assume that the KB is in CNF
                         result ← false
                 
                 if result
-                    Value-Map.add[q] ← result
+                    Value-Map.add[q] ← true
                     return Value-Map
 
         return Value-Map
@@ -61,7 +60,9 @@ I assume that the KB is in CNF
 ## Task 3
 Yes it returns false due to a cyclic case. My algorithm handles cyclic cases by checking if a Symbol has already been already exists in the Value-Map
  
- ## Task 4
- I assume that it is meant what time complexity the algorithm runs in based on the amount of clauses.
+This is achieved by adding (q, false) to the Value-Map before checking the Premise of a clause. Then if q is reached through again in one of the premise symbols(or through any number of recoursions) it will just return the value-map(where the value of the symbol is false) and not try to update again.
+
+## Task 4
+I assume that it is meant what time complexity the algorithm runs in based on the amount of propositional symbols.
  
- My algorithm
+My algorithm runs in linear time since every symbol will only be visited once due to the generation of the value-map and if a symbol already has been entailed it will not be entailed again.
