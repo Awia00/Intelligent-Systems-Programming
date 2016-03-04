@@ -15,8 +15,8 @@ package iaip_c4;
 
 
 import javax.swing.*;
-import java.net.URLClassLoader;
-import java.lang.reflect.*;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 public class ShowGame
 {
@@ -28,7 +28,7 @@ public class ShowGame
      * using the name "human" in one of the logics will activate the default human agent
      * standard values for cols and rows is 7x6
      */
-    public static void main(String[] args)
+    public static void main(String[] args) throws IOException
     {
         IGameLogic player1 = null;
         IGameLogic player2 = null;
@@ -126,7 +126,8 @@ public class ShowGame
                    InvocationTargetException {
         IGameLogic retGL = null;
         if(!cmdParam.equalsIgnoreCase(HUMAN_CMD)) {
-            retGL = (IGameLogic)Class.forName(cmdParam).getConstructor().newInstance();
+            retGL = new GameLogic();
+            //retGL = (IGameLogic)Class.forName(cmdParam).getConstructor().newInstance();
         }
         return retGL;
     }

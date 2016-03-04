@@ -1,7 +1,10 @@
 package iaip_c4;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.io.IOException;
 
 /**
  * You do not have to change anything in this file. 
@@ -33,26 +36,28 @@ public class FourConnectGUI extends JComponent implements MouseListener
      * @param cols The columns of the game board
      * @param rows The rows of the game board
      */
-    public FourConnectGUI(IGameLogic player1, IGameLogic player2, int cols, int rows)
+    public FourConnectGUI(IGameLogic player1, IGameLogic player2, int cols, int rows) throws IOException
     {
-	part = Toolkit.getDefaultToolkit().getImage("imgs/maze.png");
-	redPion = Toolkit.getDefaultToolkit().getImage("imgs/redPion.png");
-	bluePion = Toolkit.getDefaultToolkit().getImage("imgs/bluePion.png");
-	arrow = Toolkit.getDefaultToolkit().getImage("imgs/arrow.png");
-	arrow_active = Toolkit.getDefaultToolkit().getImage("imgs/arrow_active.png");
-	background = Toolkit.getDefaultToolkit().getImage("imgs/background.png");
+        System.out.println("Working Directory = " +
+                System.getProperty("user.dir"));
+	part = Toolkit.getDefaultToolkit().getImage("src/iaip_c4/imgs/maze.png");
+	redPion = Toolkit.getDefaultToolkit().getImage("src/iaip_c4/imgs/redPion.png");
+	bluePion = Toolkit.getDefaultToolkit().getImage("src/iaip_c4/imgs/bluePion.png");
+	arrow = Toolkit.getDefaultToolkit().getImage("src/iaip_c4/imgs/arrow.png");
+	arrow_active = Toolkit.getDefaultToolkit().getImage("src/iaip_c4/imgs/arrow_active.png");
+	background = Toolkit.getDefaultToolkit().getImage("src/iaip_c4/imgs/background.png");
 		
-	border_left = Toolkit.getDefaultToolkit().getImage("imgs/border_left.png");
-	border_right = Toolkit.getDefaultToolkit().getImage("imgs/border_right.png");
-	border_top = Toolkit.getDefaultToolkit().getImage("imgs/border_top.png");
-	border_bottom = Toolkit.getDefaultToolkit().getImage("imgs/border_bottom.png");
-	corner_left_top = Toolkit.getDefaultToolkit().getImage("imgs/corner_left_top.png");
-	corner_left_bottom = Toolkit.getDefaultToolkit().getImage("imgs/corner_left_bottom.png");
-	corner_right_top = Toolkit.getDefaultToolkit().getImage("imgs/corner_right_top.png");
-	corner_right_bottom = Toolkit.getDefaultToolkit().getImage("imgs/corner_right_bottom.png");
+	border_left = Toolkit.getDefaultToolkit().getImage("src/iaip_c4/imgs/border_left.png");
+	border_right = Toolkit.getDefaultToolkit().getImage("src/iaip_c4/imgs/border_right.png");
+	border_top = Toolkit.getDefaultToolkit().getImage("src/iaip_c4/imgs/border_top.png");
+	border_bottom = Toolkit.getDefaultToolkit().getImage("src/iaip_c4/imgs/border_bottom.png");
+	corner_left_top = Toolkit.getDefaultToolkit().getImage("src/iaip_c4/imgs/corner_left_top.png");
+	corner_left_bottom = Toolkit.getDefaultToolkit().getImage("src/iaip_c4/imgs/corner_left_bottom.png");
+	corner_right_top = Toolkit.getDefaultToolkit().getImage("src/iaip_c4/imgs/corner_right_top.png");
+	corner_right_bottom = Toolkit.getDefaultToolkit().getImage("src/iaip_c4/imgs/corner_right_bottom.png");
 
-	redWon = Toolkit.getDefaultToolkit().getImage("imgs/redwon.png");
-	blueWon = Toolkit.getDefaultToolkit().getImage("imgs/bluewon.png");
+	redWon = Toolkit.getDefaultToolkit().getImage("src/iaip_c4/imgs/redwon.png");
+	blueWon = Toolkit.getDefaultToolkit().getImage("src/iaip_c4/imgs/bluewon.png");
 		
 	chosenColumn = -1;
 	this.player1 = player1;
@@ -68,8 +73,8 @@ public class FourConnectGUI extends JComponent implements MouseListener
      */
     public void paint(Graphics g){
 	this.setDoubleBuffered(true);
-	Insets in = getInsets();               
-	g.translate(in.left, in.top);            
+	Insets in = getInsets();
+	g.translate(in.left, in.top);
 
 	//int[][] gameboard = logic.getGameBoard();
 	int cols = gameBoard.length;
