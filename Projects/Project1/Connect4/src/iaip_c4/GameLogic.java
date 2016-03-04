@@ -1,5 +1,7 @@
 package iaip_c4;
 
+import java.util.Random;
+
 public class GameLogic implements IGameLogic {
     private int x = 0;
     private int y = 0;
@@ -28,7 +30,7 @@ public class GameLogic implements IGameLogic {
 
     public int decideNextMove() {
         //TODO Write your implementation for this method
-        return 0;
+        return new Random().nextInt(x);
     }
 
 }
