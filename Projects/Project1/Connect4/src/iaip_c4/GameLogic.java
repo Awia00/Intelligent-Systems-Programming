@@ -64,20 +64,20 @@ public class GameLogic implements IGameLogic {
 
     private boolean CheckWin(int i, int j, int playerId)
     {
-        if(j+3<=y) // row
+        if(j+3<y) // row
         {
             if(gameState[i][j]==playerId && gameState[i][j+1]==playerId && gameState[i][j+2]==playerId && gameState[i][j+3]==playerId)
             {
                 return true;
             }
         }
-        if(i+3<=x) // column
+        if(i+3<x) // column
         {
             if(gameState[i][j]==playerId && gameState[i+1][j]==playerId && gameState[i+2][j]==playerId && gameState[i+3][j]==playerId)
             {
                 return true;
             }
-            if(j+3<=y) // diagonal upwards
+            if(j+3<y) // diagonal upwards
             {
                 if(gameState[i][j]==playerId && gameState[i+1][j+1]==playerId && gameState[i+2][j+2]==playerId && gameState[i+3][j+3]==playerId)
                 {
