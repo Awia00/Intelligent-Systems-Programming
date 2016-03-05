@@ -59,7 +59,7 @@ public class GameLogic implements IGameLogic {
         int value = Integer.MIN_VALUE;
         for (int action : actions)
         {
-            int actionValue = minValue(result(gameState, action, playerID), 5);
+            int actionValue = minValue(result(gameState, action, playerID), 6);
             if (actionValue > value)
             {
                 decision = action;
@@ -128,8 +128,8 @@ public class GameLogic implements IGameLogic {
         {
             for (int j = 0; j < state[i].length; j++)
             {
-                if(CheckWin(state, i, j, playerID)) return 1000;
-                if(CheckWin(state, i, j, opponentID)) return -1000;
+                if(CheckWin(state, i, j, playerID)) return 10000;
+                if(CheckWin(state, i, j, opponentID)) return -10000;
             }
         }
         if(getPossibleActions(state).isEmpty()) return 0;
@@ -138,88 +138,81 @@ public class GameLogic implements IGameLogic {
 
     private int heuristic(int[][] state)
     {
-        int highestValueOwn = 0;
-        int currentValueOwn = 0;
+        int ownValue = 0;
+        int opponentValue = 0;
         for (int i = 0; i < state.length; i++)
         {
             for (int j = 0; j < state[i].length; j++)
             {
-                for (int offset = i; offset < state.length && offset<i+4; offset++)
-                {
-                    if(state[offset][j] == playerID)
-                    {
-                        currentValueOwn++;
-                    }
-                    else if (state[offset][j] == opponentID)
-                    {
-                        currentValueOwn = 0;
-                        break;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                highestValueOwn += currentValueOwn;
-                currentValueOwn = 0;
-                for (int offset = j; offset < state[i].length && offset<j+4; offset++)
-                {
-                    if(state[i][offset] == playerID)
-                    {
-                        currentValueOwn++;
-                    }
-                    else if (state[i][offset] == opponentID)
-                    {
-                        currentValueOwn = 0;
-                        break;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                highestValueOwn += currentValueOwn;
-                currentValueOwn = 0;
-                for (int offset = 0; i+offset < state.length && j+offset < state[i].length && offset<4; offset++)
-                {
-                    if(state[i+offset][j+offset] == playerID)
-                    {
-                        currentValueOwn++;
-                    }
-                    else if (state[i+offset][j+offset] == opponentID)
-                    {
-                        currentValueOwn = 0;
-                        break;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                highestValueOwn += currentValueOwn;
-                currentValueOwn = 0;
-                for (int offset = 0; i+offset < state.length && j-offset >= 0 && offset<4; offset++)
-                {
-                    if(state[i+offset][j-offset] == playerID)
-                    {
-                        currentValueOwn++;
-                    }
-                    else if (state[i+offset][j-offset] == opponentID)
-                    {
-                        currentValueOwn = 0;
-                        break;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                highestValueOwn += currentValueOwn;
-                currentValueOwn = 0;
+                ownValue = playerHeuristic(state,i,j,playerID, opponentID);
+                opponentValue = playerHeuristic(state,i,j,opponentID, playerID);
             }
         }
-        int total = highestValueOwn;
+        int total = ownValue-opponentValue;
         return total;
+    }
+
+    private int playerHeuristic(int[][] state, int i, int j, int playerID, int opponentID)
+    {
+        int highestValue = 0;
+        int currentValue = 0;
+
+        for (int offset = i; offset < state.length && offset<i+4; offset++)
+        {
+            if(state[offset][j] == playerID)
+            {
+                currentValue++;
+            }
+            else if (state[offset][j] == opponentID)
+            {
+                currentValue = 0;
+                break;
+            }
+        }
+        highestValue += currentValue;
+        currentValue = 0;
+        for (int offset = j; offset < state[i].length && offset<j+4; offset++)
+        {
+            if(state[i][offset] == playerID)
+            {
+                currentValue++;
+            }
+            else if (state[i][offset] == opponentID)
+            {
+                currentValue = 0;
+                break;
+            }
+        }
+        highestValue += currentValue;
+        currentValue = 0;
+        for (int offset = 0; i+offset < state.length && j+offset < state[i].length && offset<4; offset++)
+        {
+            if(state[i+offset][j+offset] == playerID)
+            {
+                currentValue++;
+            }
+            else if (state[i+offset][j+offset] == opponentID)
+            {
+                currentValue = 0;
+                break;
+            }
+        }
+        highestValue += currentValue;
+        currentValue = 0;
+        for (int offset = 0; i+offset < state.length && j-offset >= 0 && offset<4; offset++)
+        {
+            if(state[i+offset][j-offset] == playerID)
+            {
+                currentValue++;
+            }
+            else if (state[i+offset][j-offset] == opponentID)
+            {
+                currentValue = 0;
+                break;
+            }
+        }
+        highestValue += currentValue;
+        return highestValue;
     }
 
     private int getEmptyRowOnColumn(int[][] state, int column)
