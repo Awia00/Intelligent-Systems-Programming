@@ -23,19 +23,24 @@ public class GameLogic implements IGameLogic {
     }
 	
     public Winner gameFinished() {
-        for (int i = 0; i < gameState.length; i++)
+        return findWinner(gameState);
+    }
+
+    public Winner findWinner(int[][] state)
+    {
+        for (int i = 0; i < state.length; i++)
         {
-            for (int j = 0; j < gameState[i].length; j++)
+            for (int j = 0; j < state[i].length; j++)
             {
                 int winner = 0;
-                if(CheckWin(gameState, i, j, playerID)) winner = playerID;
-                if(CheckWin(gameState, i, j, opponentID)) winner = opponentID;
+                if(CheckWin(state, i, j, playerID)) winner = playerID;
+                if(CheckWin(state, i, j, opponentID)) winner = opponentID;
                 if (winner != 0) {
                     return winner == 1 ? Winner.PLAYER1 : Winner.PLAYER2;
                 }
             }
         }
-        if(getPossibleActions(gameState).isEmpty()) return Winner.TIE;
+        if(getPossibleActions(state).isEmpty()) return Winner.TIE;
 
         return Winner.NOT_FINISHED;
     }
@@ -59,7 +64,7 @@ public class GameLogic implements IGameLogic {
         int value = Integer.MIN_VALUE;
         for (int action : actions)
         {
-            int actionValue = minValue(result(gameState, action, playerID), 6);
+            int actionValue = minValue(result(gameState, action, playerID), 5);
             if (actionValue > value)
             {
                 decision = action;
@@ -111,29 +116,30 @@ public class GameLogic implements IGameLogic {
 
     private boolean isTerminal(int[][] state)
     {
-        for (int i = 0; i < gameState.length; i++)
-        {
-            for (int j = 0; j < gameState[i].length; j++)
-            {
-                if(CheckWin(state, i,j, playerID)) return true;
-                if(CheckWin(state, i,j, opponentID)) return true;
-            }
-        }
-        if(getPossibleActions(state).isEmpty()) return true;
-        return false;
+        if(findWinner(state) == Winner.NOT_FINISHED) return false;
+        return true;
     }
     private int utility(int[][] state)
     {
-        for (int i = 0; i < state.length; i++)
-        {
-            for (int j = 0; j < state[i].length; j++)
-            {
-                if(CheckWin(state, i, j, playerID)) return 10000;
-                if(CheckWin(state, i, j, opponentID)) return -10000;
-            }
+        Winner winner = findWinner(state);
+        switch (winner) {
+            case NOT_FINISHED:
+                return heuristic(state);
+            case TIE:
+                return 0;
+            case PLAYER1:
+                if (playerID==1)
+                    return Integer.MAX_VALUE-1;
+                else
+                    return Integer.MIN_VALUE+1;
+            case PLAYER2:
+                if (playerID==1)
+                    return Integer.MIN_VALUE-1;
+                else
+                    return Integer.MAX_VALUE+1;
+            default:
+                return heuristic(state);
         }
-        if(getPossibleActions(state).isEmpty()) return 0;
-        return heuristic(state);
     }
 
     private int heuristic(int[][] state)
@@ -144,8 +150,8 @@ public class GameLogic implements IGameLogic {
         {
             for (int j = 0; j < state[i].length; j++)
             {
-                ownValue = playerHeuristic(state,i,j,playerID, opponentID);
-                opponentValue = playerHeuristic(state,i,j,opponentID, playerID);
+                ownValue += playerHeuristic(state, i, j, playerID, opponentID);
+                opponentValue += playerHeuristic(state, i, j, opponentID, playerID);
             }
         }
         int total = ownValue-opponentValue;
@@ -155,13 +161,13 @@ public class GameLogic implements IGameLogic {
     private int playerHeuristic(int[][] state, int i, int j, int playerID, int opponentID)
     {
         int highestValue = 0;
-        int currentValue = 0;
+        int currentValue = 1;
 
-        for (int offset = i; offset < state.length && offset<i+4; offset++)
+        for (int offset = i; offset < state.length && offset<i+3; offset++)
         {
             if(state[offset][j] == playerID)
             {
-                currentValue++;
+                currentValue*=10;
             }
             else if (state[offset][j] == opponentID)
             {
@@ -170,12 +176,12 @@ public class GameLogic implements IGameLogic {
             }
         }
         highestValue += currentValue;
-        currentValue = 0;
-        for (int offset = j; offset < state[i].length && offset<j+4; offset++)
+        currentValue = 1;
+        for (int offset = j; offset < state[i].length && offset<j+3; offset++)
         {
             if(state[i][offset] == playerID)
             {
-                currentValue++;
+                currentValue*=10;
             }
             else if (state[i][offset] == opponentID)
             {
@@ -184,12 +190,12 @@ public class GameLogic implements IGameLogic {
             }
         }
         highestValue += currentValue;
-        currentValue = 0;
-        for (int offset = 0; i+offset < state.length && j+offset < state[i].length && offset<4; offset++)
+        currentValue = 1;
+        for (int offset = 0; i+offset < state.length && j+offset < state[i].length && offset<3; offset++)
         {
             if(state[i+offset][j+offset] == playerID)
             {
-                currentValue++;
+                currentValue*=10;
             }
             else if (state[i+offset][j+offset] == opponentID)
             {
@@ -198,12 +204,12 @@ public class GameLogic implements IGameLogic {
             }
         }
         highestValue += currentValue;
-        currentValue = 0;
-        for (int offset = 0; i+offset < state.length && j-offset >= 0 && offset<4; offset++)
+        currentValue = 1;
+        for (int offset = 0; i+offset < state.length && j-3 >= 0 && offset<3; offset++)
         {
             if(state[i+offset][j-offset] == playerID)
             {
-                currentValue++;
+                currentValue*=2;
             }
             else if (state[i+offset][j-offset] == opponentID)
             {
