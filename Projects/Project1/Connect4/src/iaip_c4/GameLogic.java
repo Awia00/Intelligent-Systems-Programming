@@ -1,6 +1,8 @@
 package iaip_c4;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class GameLogic implements IGameLogic {
     private int x = 0;
@@ -66,19 +68,27 @@ public class GameLogic implements IGameLogic {
 
     public int decideNextMove()
     {
-        maxValue(gameState, Integer.MIN_VALUE, Integer.MAX_VALUE, 9,true);
+        maxValue(gameState, Integer.MIN_VALUE, Integer.MAX_VALUE, 10,true);
         int decision = bestMove;
         bestMove = -1;
         return decision;
     }
     private int bestMove = -1;
 
-    private int maxValue(int[][] state, int alpha, int beta, int depth, boolean isRoot)
+    private int maxValue(final int[][] state, int alpha, int beta, int depth, boolean isRoot)
     {
         if(isTerminal(state) || depth == 0) return utility(state);
+        ArrayList<Integer> actions = getPossibleActions(state);
+        Collections.sort(actions, new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return Integer.compare(utility(result(state,o1,playerID)), utility(result(state,o2,playerID)));
+            }
+        });
+        Collections.reverse(actions);
 
         int value = Integer.MIN_VALUE;
-        for (int action : getPossibleActions(state)) {
+        for (int action : actions) {
             int moveValue = minValue(result(state, action, playerID), alpha, beta, depth-1, false);
             if(moveValue > value )
             {
@@ -93,12 +103,20 @@ public class GameLogic implements IGameLogic {
         }
         return value;
     }
-    private int minValue(int[][] state, int alpha, int beta, int depth, boolean isRoot)
+    private int minValue(final int[][] state, int alpha, int beta, int depth, boolean isRoot)
     {
         if(isTerminal(state) || depth == 0) return utility(state);
 
+        ArrayList<Integer> actions = getPossibleActions(state);
+        Collections.sort(actions, new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return Integer.compare(utility(result(state,o1,opponentID)), utility(result(state,o2,opponentID)));
+            }
+        });
+
         int value = Integer.MAX_VALUE;
-        for (int action : getPossibleActions(state)) {
+        for (int action : actions) {
             value = Math.min(value, maxValue(result(state, action, opponentID), alpha, beta, depth-1, false));
 
             if(value <= alpha) return value;
@@ -170,7 +188,7 @@ public class GameLogic implements IGameLogic {
         int highestValue = 0;
         int currentValue = 1;
 
-        for (int offset = i; offset < state.length && offset<i+3; offset++)
+        for (int offset = i; offset < state.length && offset<i+4; offset++)
         {
             if(state[offset][j] == playerID)
             {
@@ -184,7 +202,7 @@ public class GameLogic implements IGameLogic {
         }
         highestValue += currentValue;
         currentValue = 1;
-        for (int offset = j; offset < state[i].length && offset<j+3; offset++)
+        for (int offset = j; offset < state[i].length && offset<j+4; offset++)
         {
             if(state[i][offset] == playerID)
             {
@@ -198,7 +216,7 @@ public class GameLogic implements IGameLogic {
         }
         highestValue += currentValue;
         currentValue = 1;
-        for (int offset = 0; i+offset < state.length && j+offset < state[i].length && offset<3; offset++)
+        for (int offset = 0; i+offset < state.length && j+offset < state[i].length && offset<4; offset++)
         {
             if(state[i+offset][j+offset] == playerID)
             {
@@ -212,7 +230,7 @@ public class GameLogic implements IGameLogic {
         }
         highestValue += currentValue;
         currentValue = 1;
-        for (int offset = 0; i+offset < state.length && j-3 >= 0 && offset<3; offset++)
+        for (int offset = 0; i+offset < state.length && j-4 >= 0 && offset<4; offset++)
         {
             if(state[i+offset][j-offset] == playerID)
             {
