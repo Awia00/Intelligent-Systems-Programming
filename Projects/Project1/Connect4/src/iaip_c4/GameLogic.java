@@ -56,24 +56,6 @@ public class GameLogic implements IGameLogic {
         newState[action][getEmptyRowOnColumn(state, action)] = playerID;
         return newState;
     }
-
-    public int decideNextMove()
-    {
-        ArrayList<Integer> actions = getPossibleActions(gameState);
-        int decision = -1;
-        int value = Integer.MIN_VALUE;
-        for (int action : actions)
-        {
-            int actionValue = minValue(result(gameState, action, playerID), 5);
-            if (actionValue > value)
-            {
-                decision = action;
-                value = actionValue;
-            }
-        }
-        return decision;
-    }
-
     private int[][] getCopyState(int[][] oldState)
     {
         int [][] state = new int[x][];
@@ -82,25 +64,50 @@ public class GameLogic implements IGameLogic {
         return state;
     }
 
-    private int minValue(int[][] state, int depth)
+    public int decideNextMove()
+    {
+        maxValue(gameState, Integer.MIN_VALUE, Integer.MAX_VALUE, 9,true);
+        int decision = bestMove;
+        bestMove = -1;
+        return decision;
+    }
+    private int bestMove = -1;
+
+    private int maxValue(int[][] state, int alpha, int beta, int depth, boolean isRoot)
+    {
+        if(isTerminal(state) || depth == 0) return utility(state);
+
+        int value = Integer.MIN_VALUE;
+        for (int action : getPossibleActions(state)) {
+            int moveValue = minValue(result(state, action, playerID), alpha, beta, depth-1, false);
+            if(moveValue > value )
+            {
+                value = moveValue;
+                if(isRoot)
+                {
+                    bestMove = action;
+                }
+            }
+            if(value >= beta) return value;
+            alpha = Math.max(value,alpha);
+        }
+        return value;
+    }
+    private int minValue(int[][] state, int alpha, int beta, int depth, boolean isRoot)
     {
         if(isTerminal(state) || depth == 0) return utility(state);
 
         int value = Integer.MAX_VALUE;
         for (int action : getPossibleActions(state)) {
-            value = Math.min(value, maxValue(result(state, action, opponentID), depth-1));
+            value = Math.min(value, maxValue(result(state, action, opponentID), alpha, beta, depth-1, false));
+
+            if(value <= alpha) return value;
+            beta = Math.min(value,beta);
         }
+
         return value;
     }
-    private int maxValue(int[][] state, int depth)
-    {
-        if(isTerminal(state) || depth == 0) return utility(state);
-        int value = Integer.MIN_VALUE;
-        for (int action : getPossibleActions(state)) {
-            value = Math.max(value, minValue(result(state, action, playerID), depth-1));
-        }
-        return value;
-    }
+
 
     private ArrayList<Integer> getPossibleActions(int[][] state)
     {
@@ -134,9 +141,9 @@ public class GameLogic implements IGameLogic {
                     return Integer.MIN_VALUE+1;
             case PLAYER2:
                 if (playerID==1)
-                    return Integer.MIN_VALUE-1;
+                    return Integer.MIN_VALUE+1;
                 else
-                    return Integer.MAX_VALUE+1;
+                    return Integer.MAX_VALUE-1;
             default:
                 return heuristic(state);
         }
