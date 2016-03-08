@@ -68,10 +68,9 @@ public class GameLogic implements IGameLogic {
 
     public int decideNextMove()
     {
-        maxValue(gameState, Integer.MIN_VALUE, Integer.MAX_VALUE, 10,true);
-        int decision = bestMove;
         bestMove = -1;
-        return decision;
+        maxValue(gameState, Integer.MIN_VALUE, Integer.MAX_VALUE, 10,true);
+        return bestMove;
     }
     private int bestMove = -1;
 
