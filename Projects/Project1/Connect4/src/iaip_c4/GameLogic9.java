@@ -154,21 +154,32 @@ public class GameLogic9 implements IGameLogic {
     {
         ArrayList<Integer> availableActions = availableActions(gameBoard);
 
+        long startTime = System.currentTimeMillis();
+
         int currentBest = Integer.MIN_VALUE;
         int actionToDecide = -1;
-        for (int action:availableActions)
-        {
-            int utility = minValue(result(gameBoard,action,playerID));
-            if(utility > currentBest)
-            {
-                actionToDecide = action;
-                currentBest = utility;
+        int depth = 1;
+        while (System.currentTimeMillis() - startTime < 10000) {
+            for (int action : availableActions) {
+                int utility = minValue(result(gameBoard, action, playerID), depth);
+                if (utility > currentBest) {
+                    actionToDecide = action;
+                    currentBest = utility;
+                }
+                if (currentBest == Integer.MAX_VALUE) return actionToDecide;
             }
+            depth++;
         }
         return actionToDecide;
     }
 
-    private int maxValue(int[][] state)
+    private int heuristic(int[][] state) {
+        return 0; // Todo: Implement heuristic
+    }
+
+
+
+    private int maxValue(int[][] state, int depth)
     {
         Winner winner = gameFinished(state);
 
@@ -177,36 +188,63 @@ public class GameLogic9 implements IGameLogic {
             case PLAYER1:
                 if (playerID == 1)
                 {
-                    return 1;
+                    return Integer.MAX_VALUE;
                 }
-                return -1;
+                return Integer.MIN_VALUE;
             case PLAYER2:
                 if(playerID == 2)
                 {
-                    return 1;
+                    return Integer.MAX_VALUE;
                 }
-                return -1;
+                return Integer.MIN_VALUE;
             case TIE:
                 return 0;
             default:
+                if (depth == 0)
+                    return heuristic(state);
                 break;
         }
 
         int utility = Integer.MIN_VALUE;
 
         for (int action:availableActions(state)) {
-            utility = Math.max(utility, minValue(result(state, action, playerID)));
+            utility = Math.max(utility, minValue(result(state, action, playerID), depth - 1));
         }
         return utility;
     }
 
     // Returns a utility value
-    private int minValue(int[][] state)
+    private int minValue(int[][] state, int depth)
     {
+        Winner winner = gameFinished(state);
+
+        switch (winner)
+        {
+            case PLAYER1:
+                if (playerID == 1)
+                {
+                    return Integer.MAX_VALUE;
+                }
+                return Integer.MIN_VALUE;
+            case PLAYER2:
+                if(playerID == 2)
+                {
+                    return Integer.MAX_VALUE;
+                }
+                return Integer.MIN_VALUE;
+            case TIE:
+                return 0;
+            default:
+                if (depth == 0)
+                    return heuristic(state);
+                break;
+        }
+
+
         int utility = Integer.MAX_VALUE;
 
         for (int action:availableActions(state)) {
-            utility = Math.min(utility, maxValue(result(state, action, opponentID)));
+            utility = Math.min(utility, maxValue(result(state, action, opponentID), depth - 1));
         }
         return utility;
     }
