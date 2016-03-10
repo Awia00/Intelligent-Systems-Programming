@@ -1,8 +1,8 @@
 package iaip_c4;
 
 public class GameLogic9 implements IGameLogic {
-    private int x = 0;
-    private int y = 0;
+    private int columns = 0;
+    private int rows = 0;
     private int playerID;
     
     public GameLogic9() {
@@ -17,9 +17,9 @@ public class GameLogic9 implements IGameLogic {
      * @param rows The number of rows in the game board
      * @param playerID 1 = blue (player1), 2 = red (player2)
      */
-    public void initializeGame(int x, int y, int playerID) {
-        this.x = x;
-        this.y = y;
+    public void initializeGame(int columns, int rows, int playerID) {
+        this.columns = columns;
+        this.rows = rows;
         this.playerID = playerID;
         //TODO Write your implementation for this method
     }
