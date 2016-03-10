@@ -109,9 +109,9 @@ public class ShowGame
             System.err.println(errMsg);
         }
         System.err.println("Usage: java ShowGame GameLogic1 GameLogic2 [cols rows]");
-        System.err.println("GameLogic{1,2} may be:");
+        System.err.println("GameLogicOld{1,2} may be:");
         System.err.println("\t" + HUMAN_CMD  + "\t\t - Indicates a human will be playing.");
-        System.err.println("\tGameLogic\t - Specifies a GameLogic class extending IGameLogic to use as a competitor.");
+        System.err.println("\tGameLogicOld\t - Specifies a GameLogicOld class extending IGameLogic to use as a competitor.");
         System.err.println("\tcols/rows\t - Must be integers greater than 0 and default to 7 and 6 respectively.");
     }
 
@@ -126,7 +126,7 @@ public class ShowGame
                    InvocationTargetException {
         IGameLogic retGL = null;
         if(!cmdParam.equalsIgnoreCase(HUMAN_CMD)) {
-            retGL = new GameLogic();
+            retGL = new GameLogicOld();
             //retGL = (IGameLogic)Class.forName(cmdParam).getConstructor().newInstance();
         }
         return retGL;
