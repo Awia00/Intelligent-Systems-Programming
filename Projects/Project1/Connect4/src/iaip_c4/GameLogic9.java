@@ -36,33 +36,12 @@ public class GameLogic9 implements IGameLogic {
      */
     public Winner gameFinished()
     {
-        for (int column = 0; column<columns; column++)
-        {
-            for(int row = 0; row < rows; row++)
-            {
-                switch (playerWonOn(column,row))
-                {
-                    case 1:
-                        return Winner.PLAYER1;
-                    case 2:
-                        return Winner.PLAYER2;
-                    default:
-                        break;
-                }
-            }
-        }
-
-        if(availableActions().isEmpty())
-        {
-            return  Winner.TIE;
-        }
-
-        return Winner.NOT_FINISHED;
+        return gameFinished(gameBoard);
     }
 
-    private int playerWonOn(int column, int row)
+    private int playerWonOn(int column, int row, int[][] state)
     {
-        int playerIDOnPos = gameBoard[column][row];
+        int playerIDOnPos = state[column][row];
 
         if(playerIDOnPos == 0)
         {
@@ -72,9 +51,9 @@ public class GameLogic9 implements IGameLogic {
         // Horizontal check
         if(column + 3 < columns)
         {
-            if(gameBoard[column+1][row]==playerIDOnPos &&
-                    gameBoard[column+2][row]==playerIDOnPos &&
-                    gameBoard[column+3][row]==playerIDOnPos)
+            if(state[column+1][row]==playerIDOnPos &&
+                    state[column+2][row]==playerIDOnPos &&
+                    state[column+3][row]==playerIDOnPos)
             {
                 return playerIDOnPos;
             }
@@ -83,9 +62,9 @@ public class GameLogic9 implements IGameLogic {
         // Vertical check
         if(row+3 < rows)
         {
-            if(gameBoard[column][row+1]==playerIDOnPos &&
-                    gameBoard[column][row+2]==playerIDOnPos &&
-                    gameBoard[column][row+3]==playerIDOnPos)
+            if(state[column][row+1]==playerIDOnPos &&
+                    state[column][row+2]==playerIDOnPos &&
+                    state[column][row+3]==playerIDOnPos)
             {
                 return playerIDOnPos;
             }
@@ -94,9 +73,9 @@ public class GameLogic9 implements IGameLogic {
         // Diagonal check
         if(row+3 < rows && column + 3 < columns)
         {
-            if(gameBoard[column+1][row+1]==playerIDOnPos &&
-                    gameBoard[column+2][row+2]==playerIDOnPos &&
-                    gameBoard[column+3][row+3]==playerIDOnPos)
+            if(state[column+1][row+1]==playerIDOnPos &&
+                    state[column+2][row+2]==playerIDOnPos &&
+                    state[column+3][row+3]==playerIDOnPos)
             {
                 return playerIDOnPos;
             }
@@ -104,9 +83,9 @@ public class GameLogic9 implements IGameLogic {
 
         if(row-3 >= 0 && column + 3 < columns)
         {
-            if(gameBoard[column+1][row-1]==playerIDOnPos &&
-                    gameBoard[column+2][row-2]==playerIDOnPos &&
-                    gameBoard[column+3][row-3]==playerIDOnPos)
+            if(state[column+1][row-1]==playerIDOnPos &&
+                    state[column+2][row-2]==playerIDOnPos &&
+                    state[column+3][row-3]==playerIDOnPos)
             {
                 return playerIDOnPos;
             }
@@ -127,11 +106,11 @@ public class GameLogic9 implements IGameLogic {
         gameBoard[column][row] = playerID;
     }
 
-    private int availableRowInColumn(int column)
+    private int availableRowInColumn(int column, int[][] state)
     {
         for(int i = 0; i < rows; i++)
         {
-            if(gameBoard[column][i] == 0)
+            if(state[column][i] == 0)
             {
                 return i;
             }
@@ -139,18 +118,32 @@ public class GameLogic9 implements IGameLogic {
         return -1;
     }
 
-    private ArrayList<Integer> availableActions()
+
+    private int availableRowInColumn(int column)
+    {
+        return availableRowInColumn(column, gameBoard);
+    }
+
+    private ArrayList<Integer> availableActions(int[][] state)
     {
         int topRow = rows-1;
         ArrayList<Integer> returnList = new ArrayList<>();
         for(int i = 0; i < columns; i++)
         {
-            if(gameBoard[i][topRow] == 0)
+            if(state[i][topRow] == 0)
             {
                 returnList.add(i);
             }
         }
         return returnList;
+    }
+
+    private static int[][] getCopyState(int[][] oldState)
+    {
+        int [][] state = new int[oldState.length][];
+        for(int i = 0; i < oldState.length; i++)
+            state[i] = oldState[i].clone();
+        return state;
     }
 
     /**
@@ -159,13 +152,99 @@ public class GameLogic9 implements IGameLogic {
      */
     public int decideNextMove()
     {
-        ArrayList<Integer> availableActions = availableActions();
+        ArrayList<Integer> availableActions = availableActions(gameBoard);
 
-        return availableActions.get(0);
+        int currentBest = Integer.MIN_VALUE;
+        int actionToDecide = -1;
+        for (int action:availableActions)
+        {
+            int utility = minValue(result(gameBoard,action,playerID));
+            if(utility > currentBest)
+            {
+                actionToDecide = action;
+                currentBest = utility;
+            }
+        }
+        return actionToDecide;
     }
 
-    
+    private int maxValue(int[][] state)
+    {
+        Winner winner = gameFinished(state);
 
+        switch (winner)
+        {
+            case PLAYER1:
+                if (playerID == 1)
+                {
+                    return 1;
+                }
+                return -1;
+            case PLAYER2:
+                if(playerID == 2)
+                {
+                    return 1;
+                }
+                return -1;
+            case TIE:
+                return 0;
+            default:
+                break;
+        }
+
+        int utility = Integer.MIN_VALUE;
+
+        for (int action:availableActions(state)) {
+            utility = Math.max(utility, minValue(result(state, action, playerID)));
+        }
+        return utility;
+    }
+
+    // Returns a utility value
+    private int minValue(int[][] state)
+    {
+        int utility = Integer.MAX_VALUE;
+
+        for (int action:availableActions(state)) {
+            utility = Math.min(utility, maxValue(result(state, action, opponentID)));
+        }
+        return utility;
+    }
+
+    private int[][] result(int[][] state, int action, int playerID)
+    {
+        int[][] newState = getCopyState(state);
+        int availableRow = availableRowInColumn(action,newState);
+
+        newState[action][availableRow] = playerID;
+        return newState;
+    }
+
+    public Winner gameFinished(int[][] state)
+    {
+        for (int column = 0; column<columns; column++)
+        {
+            for(int row = 0; row < rows; row++)
+            {
+                switch (playerWonOn(column,row,state))
+                {
+                    case 1:
+                        return Winner.PLAYER1;
+                    case 2:
+                        return Winner.PLAYER2;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        if(availableActions(state).isEmpty())
+        {
+            return  Winner.TIE;
+        }
+
+        return Winner.NOT_FINISHED;
+    }
 
 
 }
