@@ -1,11 +1,11 @@
 package iaip_c4;
 
-public class GameLogic implements IGameLogic {
+public class GameLogic9 implements IGameLogic {
     private int x = 0;
     private int y = 0;
     private int playerID;
     
-    public GameLogic() {
+    public GameLogic9() {
         //TODO Write your implementation for this method
     }
 	

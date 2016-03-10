@@ -99,7 +99,7 @@ public class ShowGame
         JFrame f = new JFrame();
         f.setSize(1000,800);
         f.setTitle("Four Connect");
-        f.setDefaultCloseOperation (JFrame.EXIT_ON_CLOSE);
+        f.setDefaultCloseOperation (WindowConstants.EXIT_ON_CLOSE);
         f.getContentPane().add(g);    
         f.setVisible(true);
     }
@@ -126,7 +126,7 @@ public class ShowGame
                    InvocationTargetException {
         IGameLogic retGL = null;
         if(!cmdParam.equalsIgnoreCase(HUMAN_CMD)) {
-            retGL = new GameLogicOld();
+            retGL = new GameLogic9();
             //retGL = (IGameLogic)Class.forName(cmdParam).getConstructor().newInstance();
         }
         return retGL;
