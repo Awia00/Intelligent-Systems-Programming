@@ -9,6 +9,7 @@ public class GameLogic9 implements IGameLogic {
     private int playerID, opponentID;
     private final Map<GameBoard9, Utility9> utilityMap;
     private final Object lock = new Object();
+    private int lastDepth = 2;
 
     private GameBoard9 gameBoard;
     
@@ -78,7 +79,7 @@ public class GameLogic9 implements IGameLogic {
 
         long startTime = System.currentTimeMillis();
 
-        MiniMaxRunnable9 runnable = new MiniMaxRunnable9(startTime, availableActions);
+        MiniMaxRunnable9 runnable = new MiniMaxRunnable9(startTime, availableActions, lastDepth);
 
         Thread t = new Thread(runnable);
 
@@ -94,7 +95,7 @@ public class GameLogic9 implements IGameLogic {
         }
 
         System.out.println("Time: " + ((System.currentTimeMillis() - startTime) / 1000.0) + " s");
-        System.out.println("Depth: " + runnable.depth);
+        System.out.println("Depth: " + (lastDepth = runnable.depth));
         return runnable.actionToDecide;
     }
 
@@ -193,12 +194,12 @@ public class GameLogic9 implements IGameLogic {
         private Utility9 currentBest;
         public int depth;
 
-        public MiniMaxRunnable9(long startTime, ArrayList<Integer> availableActions) {
+        public MiniMaxRunnable9(long startTime, ArrayList<Integer> availableActions, int lastDepth) {
             this.startTime = startTime;
             this.availableActions = availableActions;
             currentBest = new Utility9(Integer.MIN_VALUE, false);
             actionToDecide = availableActions.get(0);
-            depth = 1;
+            depth = lastDepth - 2;
         }
 
         @Override
@@ -206,7 +207,6 @@ public class GameLogic9 implements IGameLogic {
             OUTERLOOP:while (System.currentTimeMillis() - startTime < 10000) {
                 int alpha = Integer.MIN_VALUE;
                 for (int action : availableActions) {
-
                     Utility9 utility = minValue(gameBoard.result(action, playerID), depth, alpha, Integer.MAX_VALUE);
                     if (utility.utility > currentBest.utility)
                     {
