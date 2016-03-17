@@ -156,24 +156,37 @@ public class GameLogic9 implements IGameLogic {
         System.out.println("Player " + playerID + " started calculating");
         ArrayList<Integer> availableActions = availableActions(gameBoard);
 
-
+        availableActions.sort(new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return Integer.compare(
+                        utility(result(gameBoard,o2,playerID)).utility,
+                        utility(result(gameBoard,o1,playerID)).utility);
+            }
+        });
 
         long startTime = System.currentTimeMillis();
 
-        int currentBest = Integer.MIN_VALUE;
+        Utility9 currentBest = new Utility9(Integer.MIN_VALUE, false);
         int actionToDecide = availableActions.get(0);
         int depth = 1;
-        while (System.currentTimeMillis() - startTime < 10000) {
+        OUTERLOOP:while (System.currentTimeMillis() - startTime < 10000) {
+
             int alpha = Integer.MIN_VALUE;
             for (int action : availableActions) {
-                int utility = minValue(result(gameBoard, action, playerID), depth, alpha,Integer.MAX_VALUE);
-                if (utility > currentBest)
+
+                Utility9 utility = minValue(result(gameBoard, action, playerID), depth, alpha, Integer.MAX_VALUE);
+                if (utility.utility > currentBest.utility)
                 {
                     actionToDecide = action;
                     currentBest = utility;
                 }
-                alpha = Math.max(alpha, utility);
-                if (currentBest == Integer.MAX_VALUE) return actionToDecide;
+                alpha = Math.max(alpha, utility.utility);
+                if (currentBest.utility == Integer.MAX_VALUE) break OUTERLOOP;
+            }
+            if(currentBest.isTerminal)
+            {
+                break;
             }
             depth++;
         }
@@ -183,181 +196,187 @@ public class GameLogic9 implements IGameLogic {
 
     private int heuristic(int[][] state)
     {
-        return utilityForPlayer(state,playerID,opponentID) - utilityForPlayer(state,opponentID,playerID);
-    }
-
-
-    private int utilityForPlayer(int[][] state, int playerID, int opponentID)
-    {
-        int utility = 0;
-        for(int i = 0; i < columns; i++)
-        {
-            for(int j = 0; j < rows; j++)
-            {
-                int localUtility = 1;
-
-                for(int k = i; k < i+4 && i + 4 < columns; k++)
-                {
-                    if(state[k][j] == playerID)
-                    {
-                        localUtility *= 10;
-                    }
-                    else if(state[k][j] == opponentID)
-                    {
-                        localUtility = 0;
-                        break;
-                    }
-                }
-
-                utility += localUtility;
-                localUtility = 1;
-
-                for(int k = j; k < j+4 && j + 4 < rows; k++)
-                {
-                    if(state[i][k] == playerID)
-                    {
-                        localUtility *= 10;
-                    }
-                    else if(state[i][k] == opponentID)
-                    {
-                        localUtility = 0;
-                        break;
-                    }
-                }
-
-                utility += localUtility;
-                localUtility = 1;
-
-                // Diagonal check upwards
-                for(int k = 0; k < 4 && j + 4 < rows && i + 4 < columns; k++)
-                {
-                    if(state[i+k][j+k] == playerID)
-                    {
-                        localUtility *= 10;
-                    }
-                    else if(state[i+k][j+k] == opponentID)
-                    {
-                        localUtility = 0;
-                        break;
-                    }
-                }
-
-                // Diagonal check downwards
-                for(int k = 0; k < 4 && j - 4 > 0 && i + 4 < columns; k++)
-                {
-                    if(state[i+k][j-k] == playerID)
-                    {
-                        localUtility *= 10;
-                    }
-                    else if(state[i+k][j-k] == opponentID)
-                    {
-                        localUtility = 0;
-                        break;
-                    }
-                }
+        int utilityOpponent = 0;
+        int utilityPlayer = 0;
+        for(int i = 0; i < columns; i++) {
+            for (int j = 0; j < rows; j++) {
+                utilityOpponent += utilityForPlayer(state,opponentID,playerID, i, j);
+                utilityPlayer += utilityForPlayer(state,playerID,opponentID,i, j);
             }
         }
 
+        return  utilityPlayer - utilityOpponent;
+
+    }
+    private Utility9 utility(int[][] state)
+    {
+        Winner winner = gameFinished(state);
+
+        switch (winner)
+        {
+            case PLAYER1:
+                if (playerID == 1)
+                {
+                    return new Utility9(Integer.MAX_VALUE,true);
+                }
+                return new Utility9(Integer.MIN_VALUE,true);
+            case PLAYER2:
+                if(playerID == 2)
+                {
+                    return new Utility9(Integer.MAX_VALUE,true);
+                }
+                return new Utility9(Integer.MIN_VALUE,true);
+            case TIE:
+                return new Utility9(0,true);
+            default:
+                return new Utility9(heuristic(state),false);
+        }
+    }
+
+    private int utilityForPlayer(int[][] state, int player, int opponent, int i, int j)
+    {
+        int utility = 0;
+        int localUtility = 1;
+
+        for(int k = i; k < i+4 && i + 4 < columns; k++)
+        {
+            if(state[k][j] == player)
+            {
+                localUtility *= 10;
+            }
+            else if(state[k][j] == opponent)
+            {
+                localUtility = 0;
+                break;
+            }
+        }
+
+        utility += localUtility;
+        localUtility = 1;
+
+        for(int k = j; k < j+4 && j + 4 < rows; k++)
+        {
+            if(state[i][k] == player)
+            {
+                localUtility *= 10;
+            }
+            else if(state[i][k] == opponent)
+            {
+                localUtility = 0;
+                break;
+            }
+        }
+
+        utility += localUtility;
+        localUtility = 1;
+
+        // Diagonal check upwards
+        for(int k = 0; k < 4 && j + 4 < rows && i + 4 < columns; k++)
+        {
+            if(state[i+k][j+k] == player)
+            {
+                localUtility *= 10;
+            }
+            else if(state[i+k][j+k] == opponent)
+            {
+                localUtility = 0;
+                break;
+            }
+        }
+        utility += localUtility;
+        localUtility = 1;
+
+        // Diagonal check downwards
+        for(int k = 0; k < 4 && j - 4 > 0 && i + 4 < columns; k++)
+        {
+            if(state[i+k][j-k] == player)
+            {
+                localUtility *= 10;
+            }
+            else if(state[i+k][j-k] == opponent)
+            {
+                localUtility = 0;
+                break;
+            }
+        }
+        utility += localUtility;
         return  utility;
     }
 
 
-    private int maxValue(final int[][] state, int depth, int alpha, int beta)
+    private Utility9 maxValue(final int[][] state, int depth, int alpha, int beta)
     {
-        Winner winner = gameFinished(state);
+        Utility9 maybeTerminal = utility(state);
+        if(depth==0) return maybeTerminal;
+        else if(maybeTerminal.isTerminal) return maybeTerminal;
 
-        switch (winner)
-        {
-            case PLAYER1:
-                if (playerID == 1)
-                {
-                    return Integer.MAX_VALUE;
-                }
-                return Integer.MIN_VALUE;
-            case PLAYER2:
-                if(playerID == 2)
-                {
-                    return Integer.MAX_VALUE;
-                }
-                return Integer.MIN_VALUE;
-            case TIE:
-                return 0;
-            default:
-                if (depth == 0)
-                    return heuristic(state);
-                break;
-        }
 
-        int utility = Integer.MIN_VALUE;
 
         ArrayList<Integer> availableActions = availableActions(state);
 
         availableActions.sort(new Comparator<Integer>() {
             @Override
             public int compare(Integer o1, Integer o2) {
-                return Integer.compare(heuristic(result(state,o2,playerID)),heuristic(result(state,o1,playerID)));
+                return Integer.compare(
+                        utility(result(state,o2,playerID)).utility,
+                        utility(result(state,o1,playerID)).utility);
             }
         });
 
-        for (int action:availableActions) {
-            utility = Math.max(utility, minValue(result(state, action, playerID), depth - 1,alpha,beta));
-            if(utility >= beta)
+        Utility9 value = new Utility9(Integer.MIN_VALUE, false);
+        for (int action:availableActions)
+        {
+            Utility9 utilityValue = minValue(result(state, action, playerID), depth - 1,alpha,beta);
+            value = Utility9.max(value, utilityValue);
+            if(value.utility >= beta)
             {
-                return utility;
+                return value;
             }
-            alpha = Math.max(alpha,utility);
+            alpha = Math.max(alpha,value.utility);
+
+            if(value.isTerminal && value.utility == Integer.MAX_VALUE)
+            {
+                return value;
+            }
         }
-        return utility;
+        return value;
     }
 
     // Returns a utility value
-    private int minValue(final int[][] state, int depth, int alpha, int beta)
+    private Utility9 minValue(final int[][] state, int depth, int alpha, int beta)
     {
-        Winner winner = gameFinished(state);
-
-        switch (winner)
-        {
-            case PLAYER1:
-                if (playerID == 1)
-                {
-                    return Integer.MAX_VALUE;
-                }
-                return Integer.MIN_VALUE;
-            case PLAYER2:
-                if(playerID == 2)
-                {
-                    return Integer.MAX_VALUE;
-                }
-                return Integer.MIN_VALUE;
-            case TIE:
-                return 0;
-            default:
-                if (depth == 0)
-                    return heuristic(state);
-                break;
-        }
-
-
-        int utility = Integer.MAX_VALUE;
+        Utility9 maybeTerminal = utility(state);
+        if(depth==0) return maybeTerminal;
+        else if(maybeTerminal.isTerminal) return maybeTerminal;
 
         ArrayList<Integer> availableActions = availableActions(state);
 
         availableActions.sort(new Comparator<Integer>() {
             @Override
             public int compare(Integer o1, Integer o2) {
-                return Integer.compare(heuristic(result(state,o1,opponentID)),heuristic(result(state,o2,opponentID)));
+                return Integer.compare(
+                        utility(result(state,o1,opponentID)).utility,
+                        utility(result(state,o2,opponentID)).utility);
             }
         });
 
+        Utility9 value = new Utility9(Integer.MAX_VALUE,false);
+
         for (int action:availableActions) {
-            utility = Math.min(utility, maxValue(result(state, action, opponentID), depth - 1,alpha,beta));
-            if(utility <= alpha)
+            Utility9 utilityValue = maxValue(result(state, action, opponentID), depth - 1,alpha,beta);
+            value = Utility9.min(value, utilityValue);
+            if(value.utility <= alpha)
             {
-                return utility;
+                return value;
             }
-            beta = Math.min(beta,utility);
+            beta = Math.min(beta,value.utility);
+
+            if(value.isTerminal && value.utility == Integer.MIN_VALUE)
+            {
+                return value;
+            }
         }
-        return utility;
+        return value;
     }
 
     private int[][] result(int[][] state, int action, int playerID)
@@ -394,6 +413,4 @@ public class GameLogic9 implements IGameLogic {
 
         return Winner.NOT_FINISHED;
     }
-
-
 }
