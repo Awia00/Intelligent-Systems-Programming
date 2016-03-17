@@ -13,11 +13,15 @@ Moreover, \texttt{Utility9} provides two static methods, \texttt{max(...)} and \
 
 The \texttt{Gameboard9} class is used to encapsulate logic in relation to (the state of) and operations on the gameboard. To name a few, this includes a utility-function, a result-function and a function that returns the available actions.
 
-Because the \texttt{GameBoard9} is used as the key in a cache for utility values, the class also overrides the \texttt{hashCode}-function and the equals function. These only compares the actual game board state, which internally is represented as a 2D array of integers.
+Because the \texttt{GameBoard9} is used as the key in a cache for utility values, the class also overrides the \texttt{hashCode}-method and the \texttt{equals}-method. These only compares the actual game board state, which internally is represented as a 2D array of integers.
 
 \subsection{Evaluation and cut-off function}
 
 Turning our attention to \texttt{GameLogic9}'s method, \texttt{decideNextMove()}, we initially extract our available actions, i.e. what columns we can fill in "coins". These actions are now explored within a set time-threshold (10 seconds) \textit{and} in increasing depth, untill time runs out. We continously search for a highest utility, \texttt{currentBest}; if the utility for the current action (in the current depth) exceeds the current highest utility, \texttt{currentBest} is updated. $\alpha$ is updated to whoever's largest of $\alpha$ (initially set to $-\infty$) and \texttt{utility}.
+
+We have implemented iterative deepening search, where the depth is calculated, based on the maximum depth of the previous search. This means that we search as far as we can within 10 seconds, and if we haven't reached the 10 second mark yet, we search through another depth. If for some reason this extra depth takes a really long time to search through, we have implemented a hard time limit on 30 seconds. This is done by having the alpha-beta-search algorithm running in a separate thread, which makes it possible for the GUI-thread (the one calling our logic) wait for the termination of the worker thread, but only if it doesn't exceed the set time limit. If this happens, the worker thread is interrupted, and the best action found so far is returned.
+
+Futhermore the current search depth is saved, and when a new search is beginning we subtract two from this depth when starting the next search. In this way we should always be able to search through at least the same depth as was reached by the previous search. The reason that we haven't hard-coded a depth, is that some searches have a relatively small branching factor, which makes it possible to get further down in the search without exceeding the time limit.
 
 
 
