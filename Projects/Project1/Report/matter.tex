@@ -23,4 +23,6 @@ Turning our attention to \texttt{GameLogic9}'s method, \texttt{decideNextMove()}
 
 
 \subsection{$\alpha$-$\beta$ pruning}
-The \texttt{GameLogic9} class implements an $\alpha-\beta$ pruning search algorithm. The idea is to reduce the search space, to only look at values that aren't already guaranteed to be matched, for either of min-value and max-value.
+The \texttt{GameLogic9} class implements an $\alpha-\beta$ pruning search algorithm. The idea is to reduce the search space, to only look at values that aren't already guaranteed to be matched, for either of min-value and max-value. The order of which values are picked have a big inpact on how well alpha beta pruning works. If the best action is picked first for max nodes and the worst for min nodes we have an optimal case and the maximum amount of nodes are cut off. To approximate this optimal order of picking actions we use the heuristic of the resulting state of each action to order the actions. 
+
+By doing this we improve the depth the gamelogic was able to go in from around 7 to 12 in the first move.
