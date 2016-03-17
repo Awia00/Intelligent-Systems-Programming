@@ -159,68 +159,69 @@ public class GameBoard9 {
         int utility = 0;
         int localUtility = 1;
 
-        for(int k = i; k < i+4 && i + 4 < columns; k++)
-        {
-            if(state[k][j] == player)
-            {
-                localUtility *= 10;
-            }
-            else if(state[k][j] == opponent)
-            {
-                localUtility = 0;
-                break;
-            }
+        if (i + 4 < columns) {
+            if (state[i][j] == 0
+                    && state[i+1][j] == player
+                    && state[i+2][j] == player
+                    && state[i+3][j] == player
+                    && state[i+4][j] == 0)
+                return Integer.MAX_VALUE;
         }
 
-        utility += localUtility;
-        localUtility = 1;
+        if (i + 3 < columns) {
+            for (int k = i; k < i + 4; k++) {
+                if (state[k][j] == player) {
+                    localUtility *= 10;
+                } else if (state[k][j] == opponent) {
+                    localUtility = 0;
+                    break;
+                }
+            }
 
-        for(int k = j; k < j+4 && j + 4 < rows; k++)
-        {
-            if(state[i][k] == player)
-            {
-                localUtility *= 10;
-            }
-            else if(state[i][k] == opponent)
-            {
-                localUtility = 0;
-                break;
-            }
+            utility += localUtility;
+            localUtility = 1;
         }
 
-        utility += localUtility;
-        localUtility = 1;
+        if (j + 3 < rows) {
+            for (int k = j; k < j + 4; k++) {
+                if (state[i][k] == player) {
+                    localUtility *= 10;
+                } else if (state[i][k] == opponent) {
+                    localUtility = 0;
+                    break;
+                }
+            }
+
+            utility += localUtility;
+            localUtility = 1;
+        }
 
         // Diagonal check upwards
-        for(int k = 0; k < 4 && j + 4 < rows && i + 4 < columns; k++)
-        {
-            if(state[i+k][j+k] == player)
-            {
-                localUtility *= 10;
+        if (j + 3 < rows && i + 3 < columns) {
+            for (int k = 0; k < 4; k++) {
+                if (state[i + k][j + k] == player) {
+                    localUtility *= 10;
+                } else if (state[i + k][j + k] == opponent) {
+                    localUtility = 0;
+                    break;
+                }
             }
-            else if(state[i+k][j+k] == opponent)
-            {
-                localUtility = 0;
-                break;
-            }
+            utility += localUtility;
+            localUtility = 1;
         }
-        utility += localUtility;
-        localUtility = 1;
 
         // Diagonal check downwards
-        for(int k = 0; k < 4 && j - 4 > 0 && i + 4 < columns; k++)
-        {
-            if(state[i+k][j-k] == player)
-            {
-                localUtility *= 10;
+        if (j - 3 > 0 && i + 3 < columns) {
+            for (int k = 0; k < 4; k++) {
+                if (state[i + k][j - k] == player) {
+                    localUtility *= 10;
+                } else if (state[i + k][j - k] == opponent) {
+                    localUtility = 0;
+                    break;
+                }
             }
-            else if(state[i+k][j-k] == opponent)
-            {
-                localUtility = 0;
-                break;
-            }
+            utility += localUtility;
         }
-        utility += localUtility;
         return  utility;
     }
 
@@ -272,5 +273,23 @@ public class GameBoard9 {
     @Override
     public int hashCode() {
         return Arrays.deepHashCode(state);
+    }
+
+    public boolean isSubsetOf(GameBoard9 gameBoard) {
+        columnLoop:
+        for (int col = 0; col < columns; col++) {
+            for (int row = 0; row < rows; row++) {
+                if (state[col][row] != 0) {
+                    if (state[col][row]!= gameBoard.state[col][row]) return false;
+                } else {
+                    // This is when we have reached the first available
+                    // row in a column in the current assignment. Everything
+                    // above this is also unassigned, and can therefore be
+                    // ignored.
+                    continue columnLoop;
+                }
+            }
+        }
+        return true;
     }
 }

@@ -2,14 +2,18 @@ package iaip_c4;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class GameLogic9 implements IGameLogic {
     private int playerID, opponentID;
+    private final Map<GameBoard9, Utility9> utilityMap;
+    private final Object lock = new Object();
 
     private GameBoard9 gameBoard;
     
     public GameLogic9() {
-        //TODO Write your implementation for this method
+        utilityMap = new ConcurrentHashMap<>();
     }
 
     /**
@@ -45,6 +49,13 @@ public class GameLogic9 implements IGameLogic {
     public void insertCoin(int column, int playerID)
     {
         gameBoard = gameBoard.result(column, playerID);
+        System.out.print("Map size before: " + utilityMap.size());
+        for (GameBoard9 gb : utilityMap.keySet()) {
+            if (!gameBoard.isSubsetOf(gb)) {
+                utilityMap.remove(gb);
+            }
+        }
+        System.out.println(". after: " + utilityMap.size() + ".");
     }
 
     /**
@@ -67,40 +78,30 @@ public class GameLogic9 implements IGameLogic {
 
         long startTime = System.currentTimeMillis();
 
-        Utility9 currentBest = new Utility9(Integer.MIN_VALUE, false);
-        int actionToDecide = availableActions.get(0);
-        int depth = 1;
-        OUTERLOOP:while (System.currentTimeMillis() - startTime < 10000) {
+        MiniMaxRunnable9 runnable = new MiniMaxRunnable9(startTime, availableActions);
 
-            int alpha = Integer.MIN_VALUE;
-            for (int action : availableActions) {
+        Thread t = new Thread(runnable);
 
-                Utility9 utility = minValue(gameBoard.result(action, playerID), depth, alpha, Integer.MAX_VALUE);
-                if (utility.utility > currentBest.utility)
-                {
-                    actionToDecide = action;
-                    currentBest = utility;
-                }
-                alpha = Math.max(alpha, utility.utility);
-                if (currentBest.utility == Integer.MAX_VALUE) break OUTERLOOP;
+        t.start();
+
+        synchronized (lock) {
+            try {
+                lock.wait(30000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-            if(currentBest.isTerminal)
-            {
-                break;
-            }
-            depth++;
+            t.interrupt();
         }
-        System.out.println("Depth: " + depth);
-        return actionToDecide;
+
+        System.out.println("Time: " + ((System.currentTimeMillis() - startTime) / 1000.0) + " s");
+        System.out.println("Depth: " + runnable.depth);
+        return runnable.actionToDecide;
     }
 
     private Utility9 maxValue(final GameBoard9 state, int depth, int alpha, int beta)
     {
         Utility9 maybeTerminal = state.utility();
-        if(depth==0) return maybeTerminal;
-        else if(maybeTerminal.isTerminal) return maybeTerminal;
-
-
+        if(depth==0 || maybeTerminal.isTerminal) return maybeTerminal;
 
         ArrayList<Integer> availableActions = state.availableActions();
 
@@ -116,7 +117,15 @@ public class GameLogic9 implements IGameLogic {
         Utility9 value = new Utility9(Integer.MIN_VALUE, false);
         for (int action:availableActions)
         {
-            Utility9 utilityValue = minValue(state.result(action, playerID), depth - 1,alpha,beta);
+            GameBoard9 newState = state.result(action, playerID);
+            Utility9 utilityValue;
+            if (utilityMap.containsKey(newState)) {
+                utilityValue = utilityMap.get(newState);
+            } else {
+                utilityValue = minValue(newState, depth - 1, alpha, beta);
+                if (utilityValue.isTerminal)
+                    utilityMap.put(newState, utilityValue);
+            }
             value = Utility9.max(value, utilityValue);
             if(value.utility >= beta)
             {
@@ -153,7 +162,15 @@ public class GameLogic9 implements IGameLogic {
         Utility9 value = new Utility9(Integer.MAX_VALUE,false);
 
         for (int action:availableActions) {
-            Utility9 utilityValue = maxValue(state.result(action, opponentID), depth - 1,alpha,beta);
+            GameBoard9 newState = state.result(action, opponentID);
+            Utility9 utilityValue;
+            if (utilityMap.containsKey(newState)) {
+                utilityValue = utilityMap.get(newState);
+            } else {
+                utilityValue = maxValue(newState, depth - 1, alpha, beta);
+                if (utilityValue.isTerminal)
+                    utilityMap.put(newState, utilityValue);
+            }
             value = Utility9.min(value, utilityValue);
             if(value.utility <= alpha)
             {
@@ -167,5 +184,47 @@ public class GameLogic9 implements IGameLogic {
             }
         }
         return value;
+    }
+
+    public class MiniMaxRunnable9 implements Runnable {
+        private final long startTime;
+        private final ArrayList<Integer> availableActions;
+        public int actionToDecide;
+        private Utility9 currentBest;
+        public int depth;
+
+        public MiniMaxRunnable9(long startTime, ArrayList<Integer> availableActions) {
+            this.startTime = startTime;
+            this.availableActions = availableActions;
+            currentBest = new Utility9(Integer.MIN_VALUE, false);
+            actionToDecide = availableActions.get(0);
+            depth = 1;
+        }
+
+        @Override
+        public void run() {
+            OUTERLOOP:while (System.currentTimeMillis() - startTime < 10000) {
+                int alpha = Integer.MIN_VALUE;
+                for (int action : availableActions) {
+
+                    Utility9 utility = minValue(gameBoard.result(action, playerID), depth, alpha, Integer.MAX_VALUE);
+                    if (utility.utility > currentBest.utility)
+                    {
+                        actionToDecide = action;
+                        currentBest = utility;
+                    }
+                    alpha = Math.max(alpha, utility.utility);
+                    if (currentBest.utility == Integer.MAX_VALUE) break OUTERLOOP;
+                }
+                if(currentBest.isTerminal)
+                {
+                    break;
+                }
+                depth++;
+            }
+            synchronized (lock) {
+                lock.notify();
+            }
+        }
     }
 }
