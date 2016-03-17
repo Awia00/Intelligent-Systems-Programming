@@ -21,7 +21,7 @@ Turning our attention to \texttt{GameLogic9}'s method, \texttt{decideNextMove()}
 
 
 \subsection{Heuristic}
-
+The heuristic used in the evaluation function is based on the fact that the more coins a player has in a row, column or diagonal the better position you are in. So For each coin you have in a line, a value is multiplied by 10, but if an opponent coin is placed anywhere in the line then the value is reduced to zero. That way only possible winning lines are rewarded. Furthermore, if a player has 3 in a row, and there is no coin on either left or right side, and the next move on those two columns are extending the line then a situation where victory is ensured has happened and the maximum possible value is returned.
 
 \subsection{$\alpha$-$\beta$ pruning}
 The \texttt{GameLogic9} class implements an $\alpha-\beta$ pruning search algorithm. The idea is to reduce the search space, to only look at values that aren't already guaranteed to be matched, for either of min-value and max-value. The order of which values are picked have a big inpact on how well alpha beta pruning works. If the best action is picked first for max nodes and the worst for min nodes we have an optimal case and the maximum amount of nodes are cut off. To approximate this optimal order of picking actions we use the heuristic of the resulting state of each action to order the actions. 
