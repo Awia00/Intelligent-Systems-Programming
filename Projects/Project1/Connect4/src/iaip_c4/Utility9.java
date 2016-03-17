@@ -1,7 +1,9 @@
 package iaip_c4;
 
 /**
- * Created by Morten on 17/03/2016.
+ * The utility class is used to tag a utility value with extra information.
+ *
+ * Currently this information is whether the utility represents a heuristic or an actual utility of a terminal state.
  */
 public class Utility9
 {
