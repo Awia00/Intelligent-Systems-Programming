@@ -24,19 +24,97 @@ public class GameBoard9 {
         this.rows = rows;
     }
 
-    private int heuristic()
-    {
-        int utilityOpponent = 0;
-        int utilityPlayer = 0;
-        for(int i = 0; i < columns; i++) {
-            for (int j = 0; j < rows; j++) {
-                utilityOpponent += heuristicForPlayer(opponentID,playerID, i, j);
-                utilityPlayer += heuristicForPlayer(playerID,opponentID,i, j);
+    private int getRowPoints(int column, int row, int playerID) {
+        if (column >= 0 && column + 4 < columns) {
+            if (row == 0 || (state[column][row - 1] != 0 && state[column + 4][row - 1] != 0)) {
+                if (state[column][row] == 0 &&
+                        state[column + 1][row] == playerID &&
+                        state[column + 2][row] == playerID &&
+                        state[column + 3][row] == playerID &&
+                        state[column + 4][row] == 0)
+                    return Integer.MAX_VALUE;
             }
         }
 
-        return  utilityPlayer - utilityOpponent;
+        int result = 1;
+        if (column + 3 < columns) {
+            for (int i = 0; i < 4; i++) {
+                if (state[column + i][row] == playerID) result *= 10;
+                else if (state[column + i][row] != 0) return 0; // Opponent blocked.
+            }
+        }
 
+        return result;
+    }
+
+    private int getColumnPoints(int column, int row, int playerID) {
+        int result = 1;
+        if (row + 3 < rows) {
+            for (int i = 0; i < 4; i++) {
+                if (state[column][row + i] == playerID) result *= 10;
+                else if (state[column][row + i] != 0) return 0; // Opponent blocked.
+            }
+        }
+        return result;
+    }
+
+    private int getUpwardsDiagonalPoints(int column, int row, int playerID) {
+        if (column + 4 < columns && row + 4 < rows) {
+            if (state[column][row] == 0 &&
+                    state[column][row + 1] == playerID &&
+                    state[column][row + 2] == playerID &&
+                    state[column][row + 3] == playerID &&
+                    state[column][row + 4] == 0)
+                return Integer.MAX_VALUE;
+        }
+
+        int result = 1;
+        if (column + 3 < columns && row + 3 < rows) {
+            for (int i = 0; i < 4; i++) {
+                if (state[column + i][row + i] == playerID) result *= 10;
+                else if (state[column + i][row + i] != 0) return 0; // Opponent blocked.
+            }
+        }
+        return result;
+    }
+
+    private int getDownwardsDiagonalPoints(int column, int row, int playerID){
+        if (column + 4 < columns && row - 4 >= 0) {
+            if (state[column][row] == 0 &&
+                    state[column + 1][row - 1] == playerID &&
+                    state[column + 2][row - 2] == playerID &&
+                    state[column + 3][row - 3] == playerID &&
+                    state[column + 4][row - 4] == 0)
+                return Integer.MAX_VALUE;
+        }
+
+        int result = 1;
+        if (column + 3 < columns && row - 3 >= 0) {
+            for (int i = 0; i < 4; i++) {
+                if (state[column + i][row - i] == playerID) result *= 10;
+                else if (state[column + i][row - i] != 0) return 0; // Opponent blocked.
+            }
+        }
+        return result;
+    }
+
+    private int heuristic()
+    {
+        int result = 0;
+        for (int column = 0; column < columns; column++) {
+            for (int row = 0; row < rows; row++) {
+                result += getRowPoints(column, row, playerID);
+                result += getColumnPoints(column, row, playerID);
+                result += getUpwardsDiagonalPoints(column, row, playerID);
+                result += getDownwardsDiagonalPoints(column, row, playerID);
+
+                result -= getRowPoints(column, row, opponentID);
+                result -= getColumnPoints(column, row, opponentID);
+                result -= getUpwardsDiagonalPoints(column, row, opponentID);
+                result -= getDownwardsDiagonalPoints(column, row, opponentID);
+            }
+        }
+        return result;
     }
 
     public GameBoard9 result(int action, int playerID)
@@ -45,7 +123,7 @@ public class GameBoard9 {
         int availableRow = availableRowInColumn(action);
 
         newState[action][availableRow] = playerID;
-        return new GameBoard9(newState, playerID, opponentID);
+        return new GameBoard9(newState, this.playerID, opponentID);
     }
 
     public IGameLogic.Winner gameFinished()
@@ -152,77 +230,6 @@ public class GameBoard9 {
             default:
                 return new Utility9(heuristic(),false);
         }
-    }
-
-    private int heuristicForPlayer(int player, int opponent, int i, int j)
-    {
-        int utility = 0;
-        int localUtility = 1;
-
-        if (i + 4 < columns) {
-            if (state[i][j] == 0
-                    && state[i+1][j] == player
-                    && state[i+2][j] == player
-                    && state[i+3][j] == player
-                    && state[i+4][j] == 0)
-                return Integer.MAX_VALUE;
-        }
-
-        if (i + 3 < columns) {
-            for (int k = i; k < i + 4; k++) {
-                if (state[k][j] == player) {
-                    localUtility *= 10;
-                } else if (state[k][j] == opponent) {
-                    localUtility = 0;
-                    break;
-                }
-            }
-
-            utility += localUtility;
-            localUtility = 1;
-        }
-
-        if (j + 3 < rows) {
-            for (int k = j; k < j + 4; k++) {
-                if (state[i][k] == player) {
-                    localUtility *= 10;
-                } else if (state[i][k] == opponent) {
-                    localUtility = 0;
-                    break;
-                }
-            }
-
-            utility += localUtility;
-            localUtility = 1;
-        }
-
-        // Diagonal check upwards
-        if (j + 3 < rows && i + 3 < columns) {
-            for (int k = 0; k < 4; k++) {
-                if (state[i + k][j + k] == player) {
-                    localUtility *= 10;
-                } else if (state[i + k][j + k] == opponent) {
-                    localUtility = 0;
-                    break;
-                }
-            }
-            utility += localUtility;
-            localUtility = 1;
-        }
-
-        // Diagonal check downwards
-        if (j - 3 > 0 && i + 3 < columns) {
-            for (int k = 0; k < 4; k++) {
-                if (state[i + k][j - k] == player) {
-                    localUtility *= 10;
-                } else if (state[i + k][j - k] == opponent) {
-                    localUtility = 0;
-                    break;
-                }
-            }
-            utility += localUtility;
-        }
-        return  utility;
     }
 
     public int availableRowInColumn(int column)
