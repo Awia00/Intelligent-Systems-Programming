@@ -1,6 +1,7 @@
 package iaip_c4;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class GameLogic9 implements IGameLogic {
     private int columns = 0;
@@ -152,34 +153,116 @@ public class GameLogic9 implements IGameLogic {
      */
     public int decideNextMove()
     {
+        System.out.println("Player " + playerID + " started calculating");
         ArrayList<Integer> availableActions = availableActions(gameBoard);
+
+
 
         long startTime = System.currentTimeMillis();
 
         int currentBest = Integer.MIN_VALUE;
-        int actionToDecide = -1;
+        int actionToDecide = availableActions.get(0);
         int depth = 1;
         while (System.currentTimeMillis() - startTime < 10000) {
+            int alpha = Integer.MIN_VALUE;
             for (int action : availableActions) {
-                int utility = minValue(result(gameBoard, action, playerID), depth);
-                if (utility > currentBest) {
+                int utility = minValue(result(gameBoard, action, playerID), depth, alpha,Integer.MAX_VALUE);
+                if (utility > currentBest)
+                {
                     actionToDecide = action;
                     currentBest = utility;
                 }
+                alpha = Math.max(alpha, utility);
                 if (currentBest == Integer.MAX_VALUE) return actionToDecide;
             }
             depth++;
         }
+        System.out.println("Depth: " + depth);
         return actionToDecide;
     }
 
-    private int heuristic(int[][] state) {
-        return 0; // Todo: Implement heuristic
+    private int heuristic(int[][] state)
+    {
+        return utilityForPlayer(state,playerID,opponentID) - utilityForPlayer(state,opponentID,playerID);
     }
 
 
+    private int utilityForPlayer(int[][] state, int playerID, int opponentID)
+    {
+        int utility = 0;
+        for(int i = 0; i < columns; i++)
+        {
+            for(int j = 0; j < rows; j++)
+            {
+                int localUtility = 1;
 
-    private int maxValue(int[][] state, int depth)
+                for(int k = i; k < i+4 && i + 4 < columns; k++)
+                {
+                    if(state[k][j] == playerID)
+                    {
+                        localUtility *= 10;
+                    }
+                    else if(state[k][j] == opponentID)
+                    {
+                        localUtility = 0;
+                        break;
+                    }
+                }
+
+                utility += localUtility;
+                localUtility = 1;
+
+                for(int k = j; k < j+4 && j + 4 < rows; k++)
+                {
+                    if(state[i][k] == playerID)
+                    {
+                        localUtility *= 10;
+                    }
+                    else if(state[i][k] == opponentID)
+                    {
+                        localUtility = 0;
+                        break;
+                    }
+                }
+
+                utility += localUtility;
+                localUtility = 1;
+
+                // Diagonal check upwards
+                for(int k = 0; k < 4 && j + 4 < rows && i + 4 < columns; k++)
+                {
+                    if(state[i+k][j+k] == playerID)
+                    {
+                        localUtility *= 10;
+                    }
+                    else if(state[i+k][j+k] == opponentID)
+                    {
+                        localUtility = 0;
+                        break;
+                    }
+                }
+
+                // Diagonal check downwards
+                for(int k = 0; k < 4 && j - 4 > 0 && i + 4 < columns; k++)
+                {
+                    if(state[i+k][j-k] == playerID)
+                    {
+                        localUtility *= 10;
+                    }
+                    else if(state[i+k][j-k] == opponentID)
+                    {
+                        localUtility = 0;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return  utility;
+    }
+
+
+    private int maxValue(final int[][] state, int depth, int alpha, int beta)
     {
         Winner winner = gameFinished(state);
 
@@ -207,14 +290,28 @@ public class GameLogic9 implements IGameLogic {
 
         int utility = Integer.MIN_VALUE;
 
-        for (int action:availableActions(state)) {
-            utility = Math.max(utility, minValue(result(state, action, playerID), depth - 1));
+        ArrayList<Integer> availableActions = availableActions(state);
+
+        availableActions.sort(new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return Integer.compare(heuristic(result(state,o2,playerID)),heuristic(result(state,o1,playerID)));
+            }
+        });
+
+        for (int action:availableActions) {
+            utility = Math.max(utility, minValue(result(state, action, playerID), depth - 1,alpha,beta));
+            if(utility >= beta)
+            {
+                return utility;
+            }
+            alpha = Math.max(alpha,utility);
         }
         return utility;
     }
 
     // Returns a utility value
-    private int minValue(int[][] state, int depth)
+    private int minValue(final int[][] state, int depth, int alpha, int beta)
     {
         Winner winner = gameFinished(state);
 
@@ -243,8 +340,22 @@ public class GameLogic9 implements IGameLogic {
 
         int utility = Integer.MAX_VALUE;
 
-        for (int action:availableActions(state)) {
-            utility = Math.min(utility, maxValue(result(state, action, opponentID), depth - 1));
+        ArrayList<Integer> availableActions = availableActions(state);
+
+        availableActions.sort(new Comparator<Integer>() {
+            @Override
+            public int compare(Integer o1, Integer o2) {
+                return Integer.compare(heuristic(result(state,o1,opponentID)),heuristic(result(state,o2,opponentID)));
+            }
+        });
+
+        for (int action:availableActions) {
+            utility = Math.min(utility, maxValue(result(state, action, opponentID), depth - 1,alpha,beta));
+            if(utility <= alpha)
+            {
+                return utility;
+            }
+            beta = Math.min(beta,utility);
         }
         return utility;
     }
