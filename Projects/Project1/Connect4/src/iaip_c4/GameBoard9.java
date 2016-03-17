@@ -8,7 +8,7 @@ public class GameBoard9 {
     private final int playerID, opponentID;
     private final int columns, rows;
 
-    public GameBoard9(int[][] state, int playerID, int opponentID) {
+    private GameBoard9(int[][] state, int playerID, int opponentID) {
         this.state = state;
         this.columns = state.length;
         this.rows = state[0].length;
@@ -26,6 +26,7 @@ public class GameBoard9 {
 
     private int getRowPoints(int column, int row, int playerID) {
         if (column >= 0 && column + 4 < columns) {
+            // If the bottom row is in the bottom, or if it has a token below it.
             if (row == 0 || (state[column][row - 1] != 0 && state[column + 4][row - 1] != 0)) {
                 if (state[column][row] == 0 &&
                         state[column + 1][row] == playerID &&
@@ -60,12 +61,15 @@ public class GameBoard9 {
 
     private int getUpwardsDiagonalPoints(int column, int row, int playerID) {
         if (column + 4 < columns && row + 4 < rows) {
-            if (state[column][row] == 0 &&
-                    state[column][row + 1] == playerID &&
-                    state[column][row + 2] == playerID &&
-                    state[column][row + 3] == playerID &&
-                    state[column][row + 4] == 0)
-                return Integer.MAX_VALUE;
+            // If the bottom row is in the bottom, or if it has a token below it.
+            if ((row == 0 || state[column][row - 1] != 0) && state[column + 4][row + 3] != 0) {
+                if (state[column][row] == 0 &&
+                        state[column + 1][row + 1] == playerID &&
+                        state[column + 2][row + 2] == playerID &&
+                        state[column + 3][row + 3] == playerID &&
+                        state[column + 4][row + 4] == 0)
+                    return Integer.MAX_VALUE;
+            }
         }
 
         int result = 1;
@@ -80,12 +84,15 @@ public class GameBoard9 {
 
     private int getDownwardsDiagonalPoints(int column, int row, int playerID){
         if (column + 4 < columns && row - 4 >= 0) {
-            if (state[column][row] == 0 &&
-                    state[column + 1][row - 1] == playerID &&
-                    state[column + 2][row - 2] == playerID &&
-                    state[column + 3][row - 3] == playerID &&
-                    state[column + 4][row - 4] == 0)
-                return Integer.MAX_VALUE;
+            // If the bottom row is in the bottom, or if it has a token below it.
+            if ((row - 4 == 0 || state[column + 4][row - 5] != 0) && state[column][row - 1] != 0) {
+                if (state[column][row] == 0 &&
+                        state[column + 1][row - 1] == playerID &&
+                        state[column + 2][row - 2] == playerID &&
+                        state[column + 3][row - 3] == playerID &&
+                        state[column + 4][row - 4] == 0)
+                    return Integer.MAX_VALUE;
+            }
         }
 
         int result = 1;
@@ -232,7 +239,7 @@ public class GameBoard9 {
         }
     }
 
-    public int availableRowInColumn(int column)
+    private int availableRowInColumn(int column)
     {
         for(int i = 0; i < rows; i++)
         {
