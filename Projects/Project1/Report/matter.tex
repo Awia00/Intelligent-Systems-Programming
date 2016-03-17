@@ -15,6 +15,9 @@ The \texttt{Gameboard9} class is used to encapsulate logic in relation to (the s
 
 \subsection{Evaluation and cut-off function}
 
+Turning our attention to \texttt{GameLogic9}'s method, \texttt{decideNextMove()}, we initially extract our available actions, i.e. what columns we can fill in "coins". These actions are now explored within a set time-threshold (10 seconds) \textit{and} in increasing depth, untill time runs out. We continously search for a highest utility, \texttt{currentBest}; if the utility for the current action (in the current depth) exceeds the current highest utility, \texttt{currentBest} is updated. $\alpha$ is updated to whoever's largest of $\alpha$ (initially set to $-\infty$) and \texttt{utility}.
+
+
 
 
 \subsection{$\alpha$-$\beta$ pruning}
