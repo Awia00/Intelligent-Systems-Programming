@@ -3,11 +3,20 @@ package iaip_c4;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+/**
+ * Game board used as state for the logic implemented in GameLogic9
+ */
 public class GameBoard9 {
     private final int[][] state;
     private final int playerID, opponentID;
     private final int columns, rows;
 
+    /**
+     * Private constructor, used for making copies of the game board.
+     * @param state The state of this new game board. Should be a deep copy of a original, if further changes are planned, and these shouldn't affect other game boards.
+     * @param playerID The local player
+     * @param opponentID The opponent.
+     */
     private GameBoard9(int[][] state, int playerID, int opponentID) {
         this.state = state;
         this.columns = state.length;
@@ -16,6 +25,15 @@ public class GameBoard9 {
         this.opponentID = opponentID;
     }
 
+    /**
+     * Public constructor.
+     *
+     * Creates a new game board with the specified dimensions.
+     * @param columns The number of columns in the game.
+     * @param rows The number of rows in the game.
+     * @param playerID The local player
+     * @param opponentID The opponent.
+     */
     public GameBoard9(int columns, int rows, int playerID, int opponentID) {
         this.state = new int[columns][rows];
         this.playerID = playerID;
@@ -24,6 +42,15 @@ public class GameBoard9 {
         this.rows = rows;
     }
 
+    /**
+     * Calculates the number of points a row starting from a given cell.
+     *
+     * Used for heuristics.
+     * @param column The column the cell is part of
+     * @param row The row the cell belongs to
+     * @param playerID The ID of the player whose points we are counting
+     * @return A score valuing the given position in a row.
+     */
     private int getRowPoints(int column, int row, int playerID) {
         if (column >= 0 && column + 4 < columns) {
             // If the bottom row is in the bottom, or if it has a token below it.
@@ -48,6 +75,15 @@ public class GameBoard9 {
         return result;
     }
 
+    /**
+     * Calculates the number of points a column starting from a given cell.
+     *
+     * Used for heuristics.
+     * @param column The column the cell is part of
+     * @param row The row the cell belongs to
+     * @param playerID The ID of the player whose points we are counting
+     * @return A score valuing the given position in the column starting from this cell.
+     */
     private int getColumnPoints(int column, int row, int playerID) {
         int result = 1;
         if (row + 3 < rows) {
@@ -59,6 +95,15 @@ public class GameBoard9 {
         return result;
     }
 
+    /**
+     * Calculates the number of points in a upward diagonal starting from a given cell.
+     *
+     * Used for heuristics.
+     * @param column The column the cell is part of
+     * @param row The row the cell belongs to
+     * @param playerID The ID of the player whose points we are counting
+     * @return A score valuing the given position in the diagonal starting from this cell.
+     */
     private int getUpwardsDiagonalPoints(int column, int row, int playerID) {
         if (column + 4 < columns && row + 4 < rows) {
             // If the bottom row is in the bottom, or if it has a token below it.
@@ -82,6 +127,15 @@ public class GameBoard9 {
         return result;
     }
 
+    /**
+     * Calculates the number of points of a downwards diagonal starting from a given cell.
+     *
+     * Used for heuristics.
+     * @param column The column the cell is part of
+     * @param row The row the cell belongs to
+     * @param playerID The ID of the player whose points we are counting
+     * @return A score valuing the given position in the downwards diagonal starting from this cell.
+     */
     private int getDownwardsDiagonalPoints(int column, int row, int playerID){
         if (column + 4 < columns && row - 4 >= 0) {
             // If the bottom row is in the bottom, or if it has a token below it.
@@ -105,6 +159,12 @@ public class GameBoard9 {
         return result;
     }
 
+    /**
+     * The heuristic function.
+     *
+     * Works by calculating the points of each player for each position, and then substract the opponents points from your own.
+     * @return A heuristic, trying to define how good this state is.
+     */
     private int heuristic()
     {
         int result = 0;
@@ -124,6 +184,12 @@ public class GameBoard9 {
         return result;
     }
 
+    /**
+     * Applies the given action to the state.
+     * @param action The action to apply
+     * @param playerID The player who makes this move.
+     * @return A deep copy of the game board with the action applied.
+     */
     public GameBoard9 result(int action, int playerID)
     {
         int[][] newState = getCopyState();
@@ -133,6 +199,10 @@ public class GameBoard9 {
         return new GameBoard9(newState, this.playerID, opponentID);
     }
 
+    /**
+     * Determines if the game has finished, and who won, if any.
+     * @return Either PLAYER1 or PLAYER2 given that one of the players have won, TIE if the game is a tie, and NOT_FINISHED if the game board is not in a terminal state.
+     */
     public IGameLogic.Winner gameFinished()
     {
         for (int column = 0; column<columns; column++)
@@ -159,6 +229,12 @@ public class GameBoard9 {
         return IGameLogic.Winner.NOT_FINISHED;
     }
 
+    /**
+     * Private function to determine whether any player has won on this position with the given cell as fix point.
+     * @param column The column to look in
+     * @param row The row to look in
+     * @return The player who won, if any. 0 otherwise.
+     */
     private int playerWonOn(int column, int row)
     {
         int playerIDOnPos = state[column][row];
@@ -214,6 +290,13 @@ public class GameBoard9 {
         return 0;
     }
 
+    /**
+     * The utility function returns a Utility9 value.
+     *
+     * If the state is a terminal state, this is indicated by the utility value.
+     * If the state is not a terminal state, a heuristic is calculated.
+     * @return The utility or heuristic of this state.
+     */
     public Utility9 utility()
     {
         IGameLogic.Winner winner = gameFinished();
@@ -239,6 +322,11 @@ public class GameBoard9 {
         }
     }
 
+    /**
+     * Calculates the first available row in a column on this game board.
+     * @param column The column to look for available rows in.
+     * @return The first available row, if any. 0 otherwise.
+     */
     private int availableRowInColumn(int column)
     {
         for(int i = 0; i < rows; i++)
@@ -251,6 +339,10 @@ public class GameBoard9 {
         return -1;
     }
 
+    /**
+     * Calculates the list of possible actions on this game board.
+     * @return An ArrayList containing the numbers between 0 and columns, that have available rows in them.
+     */
     public ArrayList<Integer> availableActions()
     {
         int topRow = rows-1;
@@ -265,6 +357,10 @@ public class GameBoard9 {
         return returnList;
     }
 
+    /**
+     * Creates a deep copy of the inner state of the game board.
+     * @return A deep copy of the inner state of this game board.
+     */
     private int[][] getCopyState()
     {
         int [][] newState = new int[state.length][];
@@ -289,6 +385,15 @@ public class GameBoard9 {
         return Arrays.deepHashCode(state);
     }
 
+    /**
+     * Calculates whether this game board could potentially be turned into the supplied game board, by using the result function.
+     *
+     * This is done by comparing all current assignments on the board (where 0 indicates no assignment).
+     *
+     * If there doesn't exist assignments on this game board, that conflicts with assignments of the supplied game board, this game board is a subset of the other.
+     * @param gameBoard The game board to compare against.
+     * @return True if this game board in time can be turned into the supplied game board. False otherwise.
+     */
     public boolean isSubsetOf(GameBoard9 gameBoard) {
         columnLoop:
         for (int col = 0; col < columns; col++) {
