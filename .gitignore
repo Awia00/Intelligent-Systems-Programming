@@ -49,7 +49,7 @@ hs_err_pid*
 ## Plugin-specific files:
 
 # IntelliJ
-/out/
+out/
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/
@@ -63,7 +63,8 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 Projects/Project1/Connect4/.idea/workspace.xml
-
+Projects/Project2/Queens/.idea/workspace.xml
+Thumbs.db
 
 ### LaTeX ###
 *.acn
