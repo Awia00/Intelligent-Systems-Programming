@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="javabdd-1.0b2">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/src/javabdd-1.0b2.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="file://$PROJECT_DIR$/src/apidocs" />
+    </JAVADOC>
+    <SOURCES />
+    <excluded>
+      <root url="file://$PROJECT_DIR$/src/apidocs" />
+    </excluded>
+  </library>
+</component>
