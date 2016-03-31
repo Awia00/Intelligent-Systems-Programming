@@ -61,6 +61,13 @@ public class QueensLogic {
     }
 
     private void updateGameBoard() {
+        if (bdd.isZero()) {
+            for (int column = 0; column < size; column++) {
+                Arrays.fill(board[column], -1);
+            }
+            return;
+        }
+
         for (int column = 0; column < size; column++) {
             for (int row = 0; row < size; row++) {
                 BDD ithVar = mFactory.ithVar(getVariableFromCell(column, row));
