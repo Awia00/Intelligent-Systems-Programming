@@ -28,6 +28,8 @@ public class QueensLogic {
         mFactory.setVarNum(size * size);
 
         bdd = buildNQueenBDD(size);
+
+        updateGameBoard();
     }
 
    
