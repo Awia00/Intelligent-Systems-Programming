@@ -46,13 +46,45 @@ public class QueensLogic {
         // put some logic here..
         bdd.restrictWith(mFactory.ithVar(getVariableFromCell(column, row)));
 
+        // If this is the case, then we have placed a queen in a cell that was checked
         assert(!bdd.isZero());
+
+        updateGameBoard();
       
         return true;
     }
 
     private int getVariableFromCell(int column, int row) {
         return column * size + row;
+    }
+
+    private void updateGameBoard() {
+        for (int column = 0; column < size; column++) {
+            for (int row = 0; row < size; row++) {
+                BDD ithVar = mFactory.ithVar(getVariableFromCell(column, row));
+
+                BDD res = bdd.restrict(ithVar);
+
+                if (res.isZero()) { // Unsatisfiable situation
+                    board[column][row] = -1;
+                }
+
+                res.free();
+
+                BDD nithVar = mFactory.nithVar(getVariableFromCell(column, row));
+                res = bdd.restrict(nithVar);
+
+                if (res.isZero()) { // Unsatisfiable situation
+                    board[column][row] = 1;
+                }
+
+                res.free();
+                ithVar.free();
+                nithVar.free();
+            }
+        }
+
+
     }
 
     private BDD buildNQueenBDD(int size) {
