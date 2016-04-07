@@ -1,0 +1,25 @@
+\section{Approach}
+We decided to build up the BDD tree to begin with, to allow for easy insertion of queen. 
+
+\subsection{BDD construction}
+The approach to building the BDD (\textit{binary decision diagram}) goes in several stages.\\
+A TRUE-BDD is used as a basis. 
+
+\textbf{Row-rules:}\\
+We iterate over each row. For each row, an initially false BDD is built, \texttt{rowBDD}. Now, we iterate over the columns, producing a BDD, \texttt{ithVar} corresponding to a queen being placed in that column (in that row). When having placed a queen, we set the remainding spots in the row to false (making sure a queen cannot be placed within that row). This \texttt{ithVar} is now OR'ed onto the \texttt{rowBDD}. The argument for OR'ing these BDDs is used since a queen must be placed in either
+
+First, the horisontal rules are added to the tree, followed by the vertical rules. 
+
+\subsection{Placing a queen}
+When placing a queen, we check whether the position (where the queen was supposed to be placed) is either already occupied or if a queen cannot be placed there. If neither, we continue, by placing a queen into that spot on the gameboard. \\
+
+Continuing, the BDD is restricted, such that the variable in the BDD, that corresponds to the spot on the gameboard, is set true. \\
+
+We make an assertion-test, that this manipulation of the BDD did not result in a non-satisfiable BDD. (This is a relic from implementation, that was used during debugging and development). 
+
+Finally, the gameboard is updated, such that the gameboard reflects the constraints. \\
+
+\texttt{updateGameBoard(...)} simply iterates over the variables in the BDD, and updates (if needed) the corresponding spot on the gameboard. 
+
+\section{Conclusion}
+We believe we've solved the problem. We have tested the implementation, and to our beliefs it works. 
