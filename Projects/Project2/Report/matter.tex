@@ -1,3 +1,6 @@
+% !TeX root = Report.tex
+% !TeX spellcheck = en_GB
+
 \section{Approach}
 We decided to build up the BDD tree to begin with, to allow for easy insertion of queen. 
 
@@ -19,7 +22,9 @@ We make an assertion-test, that this manipulation of the BDD did not result in a
 
 Finally, the gameboard is updated, such that the gameboard reflects the constraints. \\
 
-\texttt{updateGameBoard(...)} simply iterates over the variables in the BDD, and updates (if needed) the corresponding spot on the gameboard. 
+\texttt{updateGameBoard(...)} simply iterates over the variables in the BDD, and updates (if needed) the corresponding spot on the gameboard. This is done by checking whether restricting a given variable to true and false in turn, and checking whether one of these assignments results in an unsatisfiable configuration. If this is the case, the variable is assigned to the opposite value than the one that created the unsatisfiable configuration. In the case where neither results in an unsatisfiable configuration, we do not assign the value in the board. This is because this variable can be either value, based on the choice of the user.
 
 \section{Conclusion}
-We believe we've solved the problem. We have tested the implementation, and to our beliefs it works. 
+We believe we've solved the problem. We have tested the implementation, and to our beliefs it works. \\
+
+We have checked that for game boards of size 2 and 3 there is no solution, and that some positions are unavailable for certain sizes of game boards.
