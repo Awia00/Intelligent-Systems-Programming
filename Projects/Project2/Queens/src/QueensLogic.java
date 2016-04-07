@@ -1,3 +1,9 @@
+import net.sf.javabdd.BDD;
+import net.sf.javabdd.BDDFactory;
+import net.sf.javabdd.JFactory;
+
+import java.util.Arrays;
+
 /**
  * This class implements the logic behind the BDD for the n-queens problem
  * You should implement all the missing methods
@@ -5,10 +11,6 @@
  * @author Stavros Amanatidis
  *
  */
-import java.util.*;
-
-import net.sf.javabdd.*;
-
 public class QueensLogic {
     private int size;
     private int[][] board;
@@ -74,6 +76,9 @@ public class QueensLogic {
 
         for (int column = 0; column < size; column++) {
             for (int row = 0; row < size; row++) {
+                // If the position is already chosen, there is no reason to calculate different outcomes.
+                if (board[column][row] != 0) continue;
+
                 // make column,row true
                 BDD ithVar = mFactory.ithVar(getVariableFromCell(column, row));
                 // create new bdd where column row is restricted to true.
@@ -83,6 +88,7 @@ public class QueensLogic {
                 // and we mark it with x
                 if (res.isZero()) { // Unsatisfiable situation
                     board[column][row] = -1;
+                    bdd.restrictWith(mFactory.nithVar(getVariableFromCell(column, row)));
                 }
 
                 // release memory
@@ -97,6 +103,7 @@ public class QueensLogic {
                 // since it may ever be false and we can therefore put a queen there.
                 if (res.isZero()) { // Unsatisfiable situation
                     board[column][row] = 1;
+                    bdd.restrictWith(mFactory.ithVar(getVariableFromCell(column, row)));
                 }
 
                 // free memory
