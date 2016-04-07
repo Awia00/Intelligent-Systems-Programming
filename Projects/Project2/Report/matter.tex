@@ -2,43 +2,52 @@
 % !TeX spellcheck = en_GB
 
 \section{Approach}
+Before discussing the approach it is worth to note that in the game board, which is a 2D array of integers, a value of 1 denotes a queen, -1 denotes a position where there cannot be a queen (a cross on screen), and 0 denotes a position where the configuration still allows either value.
+
+\newpar In the BDD however we only work on binary variables. In here \texttt{True} denotes a queen, while \texttt{False} represents a position that cannot have a queen. While a variable is unassigned (or not restricted enough) it can take on both values, representing the case where either a queen or a cross can be placed.
+
 We decided to build up the BDD tree to begin with, to allow for easy insertion of queens.
 
 \subsection{BDD construction}
-The approach to building the BDD (\textit{binary decision diagram}) goes in several stages.\\
+The approach to building the BDD (\textit{binary decision diagram}) goes in several stages.
+
 A TRUE-BDD is used as a basis. 
 
-\textbf{Row-rules:}\\
-By the rules of the queen problem, it must be so that there is atleast one queen in a row, and it must be that if there is a queen in a row, all other cells must be empty.\\
-To do so we iterate over each row and for each row, an initially false BDD is built, \texttt{rowBDD}. Now, we iterate over the columns, producing a BDD, \texttt{ithVar}, corresponding to a queen being placed in that column, row pair. When having placed a queen, we require that the remainding spots in the row are false, thereby making sure any more queens cannot be placed within that row. The \texttt{ithVar} BDD is now put into a disjunction with the \texttt{rowBDD}.  With \texttt{rowBDD} being initially just false, atleast one of the \texttt{ithVar} BDDs must be true, thereby requiring atleast one queen in the row. In the end all of the rowBDDs are put together as conjunctions requiring that there is atleast one queen in each row.\\
+\textbf{Row-rules:}
 
-The same procedure is repeated just for columns, producing a BDD that makes sure a queen is placed in each column. The BDDs of the row rules and the column rules are put into conjunction with eachother, requiring that it is true that there is both a queen for each row \textit{and} a queen for each column. \\
+By the rules of the queen problem, it must be so that there is atleast one queen in a row, and it must be that if there is a queen in a row, all other cells must be empty.
 
-The remaining rules of the \textit{n-queens} problem is the diagonal rule. The construction of the following BDD is outlined in the following. 
-The solution iterates over each cell on the gameboard, and creates a BDD representing the rule for the upwards diagonal and a BDD for the downwards diagonal. The BDD for the upwards diagonal is now explained; a similar explanation applies for the downwards. The latter is omitted here for brevity.\\
-Before diving in, it is worthy noting that in contrast to the above rules, for the diagonal there is no rule that a queen must be placed in every diagonal on the gameboard. For the rule, this means that we are not going to use a conjunction, but instead an implication. The reasoning is, that placing a queen in the (row,column)'th position implies that no queen must be placed in the diagonal from the (row,column)'th position. \\
+To do so we iterate over each row and for each row, an initially false BDD is built, \texttt{rowBDD}. Now, we iterate over the columns, producing a BDD, \texttt{ithVar}, corresponding to a queen being placed in that column, row pair. When having placed a queen, we require that the remainding spots in the row are false, thereby making sure any more queens cannot be placed within that row. The \texttt{ithVar} BDD is now put into a disjunction with the \texttt{rowBDD}.  With \texttt{rowBDD} being initially just false, atleast one of the \texttt{ithVar} BDDs must be true, thereby requiring atleast one queen in the row. In the end all of the rowBDDs are put together as conjunctions requiring that there is atleast one queen in each row.
 
-\texttt{ithVar} represents the BDD in which (row,column) is set to true. This \texttt{ithVar} will eventually imply another BDD, in which every position in the diagonal is constrained from being true. \\
+\newpar The same procedure is repeated just for columns, producing a BDD that makes sure a queen is placed in each column. The BDDs of the row rules and the column rules are put into conjunction with eachother, requiring that it is true that there is both a queen for each row \textit{and} a queen for each column.
+
+\newpar The remaining rules of the \textit{n-queens} problem is the diagonal rule. The construction of the following BDD is outlined in the following. 
+The solution iterates over each cell on the gameboard, and creates a BDD representing the rule for the upwards diagonal and a BDD for the downwards diagonal. The BDD for the upwards diagonal is now explained; a similar explanation applies for the downwards. The latter is omitted here for brevity.
+
+Before diving in, it is worthy noting that in contrast to the above rules, for the diagonal there is no rule that a queen must be placed in every diagonal on the gameboard. For the rule, this means that we are not going to use a conjunction, but instead an implication. The reasoning is, that placing a queen in the (row,column)'th position implies that no queen must be placed in the diagonal from the (row,column)'th position.
+
+\newpar\texttt{ithVar} represents the BDD in which (row,column) is set to true. This \texttt{ithVar} will eventually imply another BDD, in which every position in the diagonal is constrained from being true.
+
 This is done by travelling diagonally upwards to the boundary of the board from the (row,column)'th position. When reaching the boundary, we reverse direction and traverse the diagonal and constraining every position from not true, and combining these into a conjunction. The  (row,column)'th position is, however, set to true, meaning a queen is placed here.
 
-As told, a similar procedure is carried out for the downwards diagonal. \\
+As told, a similar procedure is carried out for the downwards diagonal.
 
-Finally, the diagonal-, row- and column rules are combined using conjunctions, producing the final ruleset needed for the \textit{n-queens} problem. 
+\newpar Finally, the diagonal-, row- and column rules are combined using conjunctions, producing the final ruleset needed for the \textit{n-queens} problem. 
 
 \subsection{Placing a queen}
-When placing a queen, we check whether the position (where the queen was supposed to be placed) is either already occupied or if a queen cannot be placed there. If neither, we continue, by placing a queen into that spot on the gameboard. \\
+When placing a queen, we check whether the position (where the queen was supposed to be placed) is either already occupied or if a queen cannot be placed there. If neither, we continue, by placing a queen into that spot on the gameboard.
 
-Continuing, the BDD is restricted, such that the variable in the BDD, that corresponds to the spot on the gameboard, is set true. \\
+\newpar Continuing, the BDD is restricted, such that the variable in the BDD, that corresponds to the spot on the gameboard, is set true.
 
-We make an assertion-test, that this manipulation of the BDD did not result in a non-satisfiable BDD. (This is a relic from implementation, that was used during debugging and development). 
+\newpar We make an assertion-test, that this manipulation of the BDD did not result in a non-satisfiable BDD. (This is a relic from implementation, that was used during debugging and development). 
 
-Finally, the gameboard is updated, such that the gameboard reflects the constraints. \\
+Finally, the gameboard is updated, such that the gameboard reflects the constraints.
 
-\texttt{updateGameBoard(...)} simply iterates over the variables in the BDD, and updates (if needed) the corresponding spot on the game board. This is done by checking whether restricting a given variable to true and false in turn, and checking whether one of these assignments results in an unsatisfiable configuration. If this is the case, the variable is assigned to the opposite value than the one that created the unsatisfiable configuration. In the case where neither results in an unsatisfiable configuration, we do not assign the value in the board. This is because this variable can be either value, based on the choice of the user. \\
+\newpar\texttt{updateGameBoard(...)} simply iterates over the variables in the BDD, and updates (if needed) the corresponding spot on the game board. This is done by checking whether restricting a given variable to true and false in turn, and checking whether one of these assignments results in an unsatisfiable configuration. If this is the case, the variable is assigned to the opposite value than the one that created the unsatisfiable configuration. In the case where neither results in an unsatisfiable configuration, we do not assign the value in the board. This is because this variable can be either value, based on the choice of the user.
 
-Before \texttt{updateGameBoard(...)} iterates over each position, it checks whether the current configuration is satisfiable. If not, this means that there is no solution for the given configuration, and it therefore assigns crosses to all positions in the game board. This check runs every time a queen is placed, but is actually only required for the initial game board, because the logic above should restrict positions that makes the configuration unsatisfiable.
+\newpar Before \texttt{updateGameBoard(...)} iterates over each position, it checks whether the current configuration is satisfiable. If not, this means that there is no solution for the given configuration, and it therefore assigns crosses to all positions in the game board. This check runs every time a queen is placed, but is actually only required for the initial game board, because the logic above should restrict positions that makes the configuration unsatisfiable.
 
 \section{Conclusion}
-We believe we've solved the problem. We have tested the implementation, and to our beliefs it works. \\
+We believe we've solved the problem. We have tested the implementation, and to our beliefs it works.
 
-We have checked that for game boards of size 2 and 3 there is no solution, and that some positions are unavailable for certain sizes of game boards.
+\newpar We have checked that for game boards of size 2 and 3 there is no solution, and that some positions are unavailable for certain sizes of game boards.
