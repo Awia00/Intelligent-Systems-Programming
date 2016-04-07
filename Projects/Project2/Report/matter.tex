@@ -21,8 +21,9 @@ Before diving in, it is worthy noting that in contrast to the above rules, for t
 \texttt{ithVar} represents the BDD in which (row,column) is set to true. This \texttt{ithVar} will eventually imply another BDD, in which every position in the diagonal is constrained from being true. \\
 This is done by travelling diagonally upwards to the boundary of the board from the (row,column)'th position. When reaching the boundary, we reverse direction and traverse the diagonal and constraining every position from not true, and combining these into a conjunction. The  (row,column)'th position is, however, set to true, meaning a queen is placed here.
 
+As told, a similar procedure is carried out for the downwards diagonal. \\
 
-First, the horisontal rules are added to the tree, followed by the vertical rules. 
+Finally, the diagonal-, row- and column rules are combined using conjunctions, producing the final ruleset needed for the \textit{n-queens} problem. 
 
 \subsection{Placing a queen}
 When placing a queen, we check whether the position (where the queen was supposed to be placed) is either already occupied or if a queen cannot be placed there. If neither, we continue, by placing a queen into that spot on the gameboard. \\
