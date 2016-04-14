@@ -31,6 +31,14 @@ public class QueensLogic {
 
         bdd = buildNQueenBDD(size);
 
+        // Check to see if the game board is not satisfiable / this means that there was never a solution for example boards of size 2x2 and 3x3.
+        if (bdd.isZero()) {
+            for (int column = 0; column < size; column++) {
+                Arrays.fill(board[column], -1);
+            }
+            return;
+        }
+
         updateGameBoard();
     }
 
@@ -65,15 +73,6 @@ public class QueensLogic {
     }
 
     private void updateGameBoard() {
-        // Check to see if the game board is not satisfiable / this means that there was never a solution for example boards of size 2x2 and 3x3.
-        if (bdd.isZero()) {
-            for (int column = 0; column < size; column++) {
-                Arrays.fill(board[column], -1);
-            }
-            return;
-        }
-
-
         for (int column = 0; column < size; column++) {
             for (int row = 0; row < size; row++) {
                 // If the position is already chosen, there is no reason to calculate different outcomes.
@@ -164,15 +163,15 @@ public class QueensLogic {
                         i--;
                     }
 
-                    BDD t = mFactory.one();
+                    BDD diagonal = mFactory.one();
                     // every variable except column,row is false in this diagonal.
                     for (int j = column + i, k = row + i; j < size && k < size; j++, k++) {
                         if (j == column && k == row) continue;
-                        t.andWith(mFactory.nithVar(getVariableFromCell(j, k)));
+                        diagonal.andWith(mFactory.nithVar(getVariableFromCell(j, k)));
                     }
                     // column,row implies that every other variable in diagonal is false.
                     // so if column, row is false the rest of the bdd is true / the rest of the values does not matter.
-                    ithVar.impWith(t);
+                    ithVar.impWith(diagonal);
                     // AND together with our BDD
                     bdd.andWith(ithVar); // Is this correct?
                 }
@@ -186,15 +185,15 @@ public class QueensLogic {
                         i--;
                     }
 
-                    BDD t = mFactory.one();
+                    BDD diagonal = mFactory.one();
                     // every variable except column,row is false in this diagonal.
                     for (int j = column + i, k = row - i; j < size && k >= 0; j++, k--) {
                         if (j == column && k == row) continue;
-                        t.andWith(mFactory.nithVar(getVariableFromCell(j, k)));
+                        diagonal.andWith(mFactory.nithVar(getVariableFromCell(j, k)));
                     }
                     // column,row implies that every other variable in diagonal is false.
                     // so if column, row is false the rest of the bdd is true / the rest of the values does not matter.
-                    ithVar.impWith(t);
+                    ithVar.impWith(diagonal);
                     // AND together with our BDD
                     bdd.andWith(ithVar);
                 }
