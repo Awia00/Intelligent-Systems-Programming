@@ -58,7 +58,7 @@ When placing a queen, we check whether the position, where the queen is supposed
 \section{Conclusion}
 We believe we've solved the problem. We have tested the implementation, and to our beliefs it works.
 
-For game boards of sizes below 13, the BDD is created in less than one second.
+For game boards of sizes below 11, the BDD is created in less than one second. Size 11 takes a few garbage collections, but eventually makes it. We think this has to do with the recommended values for node table and cache.
 
 \newpar We have checked that for game boards of size 2 and 3 there are no solutions, and that some positions are initially unavailable for certain sizes of game boards.
 
