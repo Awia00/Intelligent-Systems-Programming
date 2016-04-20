@@ -51,9 +51,20 @@ Therefore: D={{2},{8},{4},{0},{1}} is a solution to W.
 Describe in words a polynomial time algorithm that can find a solution to an arbitrary binary CSP
 where the constraint graph forms a tree.
 
-foreach domain in D
-    foreach constraint of domain
-        remove variable from domain if not in constraint
+    bool hasChanged = true;
+    while(not solved)
+        hasChanged = false
+        foreach domain in D
+            foreach constraint of domain
+                if variable of domain not in constraint
+                    remove variable
+                    hasChanged = false
+            // now arc consistent.
+        foreach constraint in C
+            foreach domain of constraint
+                if constraint has variable not in domain
+                    remove constraint
+                    hasChanged = false
 
-       
-
+    Choose value for first variable and traverse the all subtrees and update domains according to the new domain
+            
