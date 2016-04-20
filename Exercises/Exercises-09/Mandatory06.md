@@ -53,18 +53,25 @@ where the constraint graph forms a tree.
 
     bool hasChanged = true;
     while(not solved)
+    {
         hasChanged = false
         foreach domain in D
             foreach constraint of domain
                 if variable of domain not in constraint
+                {
                     remove variable
                     hasChanged = false
-            // now arc consistent.
+                }
+        // now arc consistent.
         foreach constraint in C
             foreach domain of constraint
                 if constraint has variable not in domain
+                {
                     remove constraint
                     hasChanged = false
-
+                }
+        // removed constraints which would never be satisfied.
+    }
     Choose value for first variable and traverse the all subtrees and update domains according to the new domain
-            
+
+DONE.
